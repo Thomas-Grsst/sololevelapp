@@ -3,6 +3,11 @@
 -- Copiez-collez ce SQL dans l'éditeur SQL de Supabase
 -- ============================================================
 
+drop table if exists public.urgent_quests;
+drop table if exists public.task_progress;
+drop table if exists public.quest_completions;
+drop table if exists public.players;
+
 -- Table des joueurs
 create table if not exists public.players (
   id uuid primary key references auth.users(id) on delete cascade,
