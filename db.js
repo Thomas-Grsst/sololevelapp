@@ -1,5 +1,5 @@
 // ============================================================
-// SOLO LEVELING — Supabase DB Layer =
+// SOLO LEVELING — Supabase DB Layer
 // ============================================================
 
 let _supabase = null;
@@ -99,27 +99,119 @@ async function loadTaskProgress(userId, dayKey) {
   return { data, error };
 }
 
-async function saveTaskProgress(
+// ── Titles ────────────────────────────────────────────────────
+
+async function loadUnlockedTitles(userId) {
+  const { data, error } = await getSupabase()
+    .from("players")
+    .select("unlocked_titles, active_title")
+    .eq("id", userId)
+    .single();
+  return { data, error };
+}
+
+async function saveActiveTitle(userId, titleId) {
+  const { data, error } = await getSupabase()
+    .from("players")
+    .update({ active_title: titleId, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  return { data, error };
+}
+
+// ── Urgent Quests ─────────────────────────────────────────────
+
+async function loadActiveUrgentQuest(userId) {
+  const { data, error } = await getSupabase()
+    .from("urgent_quests")
+    .select("*")
+    .eq("player_id", userId)
+    .eq("completed", false)
+    .eq("failed", false)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return { data, error };
+}
+
+async function createUrgentQuestDB(userId, instance) {
+  const { data, error } = await getSupabase()
+    .from("urgent_quests")
+    .insert({
+      player_id: userId,
+      instance_id: instance.instanceId,
+      quest_id: instance.questId,
+      started_at: new Date(instance.startedAt).toISOString(),
+      expires_at: new Date(
+        instance.startedAt + instance.timeLimitMs,
+      ).toISOString(),
+      completed: false,
+      failed: false,
+    });
+  return { data, error };
+}
+
+async function completeUrgentQuestDB(userId, instanceId) {
+  const { data, error } = await getSupabase()
+    .from("urgent_quests")
+    .update({ completed: true })
+    .eq("player_id", userId)
+    .eq("instance_id", instanceId);
+  return { data, error };
+}
+
+async function failUrgentQuestDB(userId, instanceId) {
+  const { data, error } = await getSupabase()
+    .from("urgent_quests")
+    .update({ failed: true })
+    .eq("player_id", userId)
+    .eq("instance_id", instanceId);
+  return { data, error };
+}
+
+async function countCompletedUrgentQuests(userId) {
+  const { count, error } = await getSupabase()
+    .from("urgent_quests")
+    .select("*", { count: "exact", head: true })
+    .eq("player_id", userId)
+    .eq("completed", true);
+  return { count: count || 0, error };
+}
+
+async function loadUrgentTaskProgress(userId, instanceId) {
+  const { data, error } = await getSupabase()
+    .from("task_progress")
+    .select("*")
+    .eq("player_id", userId)
+    .eq("day_key", "urgent_" + instanceId);
+  return { data, error };
+}
+
+async function saveUrgentTaskProgress(
   userId,
-  questId,
+  instanceId,
   taskId,
-  dayKey,
   value,
   completed,
 ) {
-  const { data, error } = await getSupabase()
-    .from("task_progress")
-    .upsert(
-      {
-        player_id: userId,
-        quest_id: questId,
-        task_id: taskId,
-        day_key: dayKey,
-        value,
-        completed,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "player_id,quest_id,task_id,day_key" },
-    );
-  return { data, error };
+  return saveTaskProgress(
+    userId,
+    "urgent",
+    taskId,
+    "urgent_" + instanceId,
+    value,
+    completed,
+  );
 }
+const { data, error } = await getSupabase().from("task_progress").upsert(
+  {
+    player_id: userId,
+    quest_id: questId,
+    task_id: taskId,
+    day_key: dayKey,
+    value,
+    completed,
+    updated_at: new Date().toISOString(),
+  },
+  { onConflict: "player_id,quest_id,task_id,day_key" },
+);
+return { data, error };
