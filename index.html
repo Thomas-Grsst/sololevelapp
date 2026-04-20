@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solo Leveling — Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="config.js"></script>
+    <script src="db.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Rajdhani", sans-serif;
+        background: #06060f;
+        color: #e8e4ff;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      .bg-anim {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 60% at 50% -20%,
+            rgba(90, 80, 200, 0.25) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 80% 100%,
+            rgba(217, 76, 122, 0.1) 0%,
+            transparent 50%
+          ),
+          #06060f;
+      }
+      .bg-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-image:
+          linear-gradient(rgba(139, 130, 232, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(139, 130, 232, 0.04) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+      .particle {
+        position: fixed;
+        border-radius: 50%;
+        animation: float-up linear infinite;
+        opacity: 0;
+      }
+      @keyframes float-up {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.6;
+        }
+        90% {
+          opacity: 0.3;
+        }
+        100% {
+          transform: translateY(-10vh) translateX(30px);
+          opacity: 0;
+        }
+      }
+      .card {
+        background: linear-gradient(145deg, #12122a, #0d0d1f);
+        border: 1px solid rgba(139, 130, 232, 0.2);
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(139, 130, 232, 0.6),
+          transparent
+        );
+      }
+      .input-sl {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(139, 130, 232, 0.25);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: #e8e4ff;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .input-sl:focus {
+        border-color: #8b82e8;
+        box-shadow: 0 0 0 3px rgba(139, 130, 232, 0.12);
+      }
+      .input-sl::placeholder {
+        color: rgba(232, 228, 255, 0.25);
+      }
+      .btn-primary {
+        width: 100%;
+        background: linear-gradient(135deg, #5a50c8, #8b82e8);
+        border: none;
+        border-radius: 10px;
+        padding: 13px;
+        color: white;
+        font-family: "Rajdhani", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s,
+          box-shadow 0.2s;
+        text-transform: uppercase;
+      }
+      .btn-primary:hover {
+        opacity: 0.88;
+        box-shadow: 0 0 20px rgba(139, 130, 232, 0.4);
+      }
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+      .btn-primary:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .error-msg {
+        background: rgba(224, 98, 60, 0.12);
+        border: 1px solid rgba(224, 98, 60, 0.3);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #f0997b;
+        display: none;
+      }
+      .success-msg {
+        background: rgba(46, 196, 160, 0.12);
+        border: 1px solid rgba(46, 196, 160, 0.3);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #5dcaa5;
+        display: none;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 10px;
+        background: transparent;
+        border: none;
+        color: rgba(232, 228, 255, 0.4);
+        font-family: "Rajdhani", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        cursor: pointer;
+        text-transform: uppercase;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        color: #8b82e8;
+        border-bottom-color: #8b82e8;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: rgba(232, 228, 255, 0.45);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-anim"></div>
+    <div class="bg-grid"></div>
+    <div id="particles"></div>
+
+    <div
+      style="position: relative; z-index: 10"
+      class="min-h-screen flex flex-col items-center justify-center px-4 py-12"
+    >
+      <!-- Logo --->
+      <div class="text-center mb-10">
+        <div
+          style="
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: rgba(139, 130, 232, 0.5);
+            font-family: &quot;Cinzel&quot;, serif;
+            margin-bottom: 12px;
+          "
+        >
+          — SYSTÈME DE JOUEURS —
+        </div>
+        <h1
+          style="
+            font-family: &quot;Cinzel&quot;, serif;
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #e8e4ff;
+            letter-spacing: 4px;
+            line-height: 1.1;
+            text-shadow: 0 0 40px rgba(139, 130, 232, 0.5);
+            margin: 0;
+          "
+        >
+          SOLO<br /><span style="color: #8b82e8">LEVELING</span>
+        </h1>
+        <div
+          style="
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: rgba(139, 130, 232, 0.5);
+            font-family: &quot;Cinzel&quot;, serif;
+            margin-top: 12px;
+          "
+        >
+          FORGE TON DESTIN
+        </div>
+      </div>
+
+      <!-- Card -->
+      <div class="card w-full p-8" style="max-width: 380px">
+        <div
+          style="
+            display: flex;
+            border-bottom: 1px solid rgba(139, 130, 232, 0.2);
+            margin-bottom: 28px;
+          "
+        >
+          <button
+            class="tab-btn active"
+            id="tab-login"
+            onclick="switchTab('login')"
+          >
+            Connexion
+          </button>
+          <button
+            class="tab-btn"
+            id="tab-register"
+            onclick="switchTab('register')"
+          >
+            Inscription
+          </button>
+        </div>
+        <div id="error-msg" class="error-msg" style="margin-bottom: 16px"></div>
+        <div
+          id="success-msg"
+          class="success-msg"
+          style="margin-bottom: 16px"
+        ></div>
+
+        <!-- LOGIN -->
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div style="margin-bottom: 16px">
+            <label>Email</label>
+            <input
+              class="input-sl"
+              type="email"
+              id="login-email"
+              placeholder="joueur@domaine.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div style="margin-bottom: 24px">
+            <label>Mot de passe</label>
+            <input
+              class="input-sl"
+              type="password"
+              id="login-password"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <button class="btn-primary" type="submit" id="login-btn">
+            ⚔ Se connecter
+          </button>
+        </form>
+
+        <!-- REGISTER -->
+        <form
+          id="register-form"
+          style="display: none"
+          onsubmit="handleRegister(event)"
+        >
+          <div style="margin-bottom: 16px">
+            <label>Nom du joueur</label>
+            <input
+              class="input-sl"
+              type="text"
+              id="reg-username"
+              placeholder="Sung Jin-Woo"
+              required
+              maxlength="24"
+            />
+          </div>
+          <div style="margin-bottom: 16px">
+            <label>Email</label>
+            <input
+              class="input-sl"
+              type="email"
+              id="reg-email"
+              placeholder="joueur@domaine.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div style="margin-bottom: 24px">
+            <label>Mot de passe</label>
+            <input
+              class="input-sl"
+              type="password"
+              id="reg-password"
+              placeholder="Minimum 6 caractères"
+              required
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
+          <button class="btn-primary" type="submit" id="register-btn">
+            ✦ Commencer l'aventure
+          </button>
+        </form>
+      </div>
+
+      <!-- Rank preview -->
+      <div
+        style="
+          margin-top: 28px;
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+          justify-content: center;
+          max-width: 360px;
+        "
+      >
+        <span
+          style="
+            font-size: 10px;
+            color: rgba(232, 228, 255, 0.2);
+            letter-spacing: 1px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 4px;
+            font-family: &quot;Cinzel&quot;, serif;
+          "
+          >RANGS DISPONIBLES</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #9b9a94;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(155, 154, 148, 0.3);
+          "
+          >E</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #6bbf25;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(107, 191, 37, 0.3);
+          "
+          >D</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #3e99e8;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(62, 153, 232, 0.3);
+          "
+          >C</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #d4891a;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 137, 26, 0.3);
+          "
+          >B</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #e0623c;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(224, 98, 60, 0.3);
+          "
+          >A</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #d94c7a;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(217, 76, 122, 0.3);
+          "
+          >S</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #8b82e8;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(139, 130, 232, 0.3);
+          "
+          >SS</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #5a50c8;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(90, 80, 200, 0.3);
+          "
+          >SSS</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #bdb5ff;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(189, 181, 255, 0.3);
+          "
+          >SSS+</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #e8deff;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 222, 255, 0.3);
+          "
+          >National</span
+        >
+        <span
+          style="
+            font-size: 11px;
+            font-weight: 700;
+            color: #ffd700;
+            padding: 2px 9px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+          "
+          >Monarque</span
+        >
+      </div>
+    </div>
+
+    <script>
+      // Particles
+      const pc = document.getElementById("particles");
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.cssText = `left:${Math.random() * 100}vw;width:${1 + Math.random() * 3}px;height:${1 + Math.random() * 3}px;background:#8B82E8;animation-duration:${8 + Math.random() * 12}s;animation-delay:${Math.random() * 15}s`;
+        pc.appendChild(p);
+      }
+      // Check session
+      (async () => {
+        const s = await getSession();
+        if (s) window.location.href = "app.html";
+      })();
+
+      function switchTab(t) {
+        document.getElementById("login-form").style.display =
+          t === "login" ? "block" : "none";
+        document.getElementById("register-form").style.display =
+          t === "register" ? "block" : "none";
+        document
+          .getElementById("tab-login")
+          .classList.toggle("active", t === "login");
+        document
+          .getElementById("tab-register")
+          .classList.toggle("active", t === "register");
+        hideMsg();
+      }
+      function showErr(m) {
+        const e = document.getElementById("error-msg");
+        e.textContent = m;
+        e.style.display = "block";
+        document.getElementById("success-msg").style.display = "none";
+      }
+      function showOk(m) {
+        const e = document.getElementById("success-msg");
+        e.textContent = m;
+        e.style.display = "block";
+        document.getElementById("error-msg").style.display = "none";
+      }
+      function hideMsg() {
+        document.getElementById("error-msg").style.display = "none";
+        document.getElementById("success-msg").style.display = "none";
+      }
+
+      async function handleLogin(e) {
+        e.preventDefault();
+        const btn = document.getElementById("login-btn");
+        btn.disabled = true;
+        btn.textContent = "Connexion...";
+        const { error } = await signIn(
+          document.getElementById("login-email").value,
+          document.getElementById("login-password").value,
+        );
+        if (error) {
+          showErr("Email ou mot de passe incorrect.");
+          btn.disabled = false;
+          btn.textContent = "⚔ Se connecter";
+        } else window.location.href = "app.html";
+      }
+      async function handleRegister(e) {
+        e.preventDefault();
+        const btn = document.getElementById("register-btn");
+        btn.disabled = true;
+        btn.textContent = "Création...";
+        const { error } = await signUp(
+          document.getElementById("reg-email").value,
+          document.getElementById("reg-password").value,
+          document.getElementById("reg-username").value.trim(),
+        );
+        if (error) {
+          showErr(error.message || "Erreur lors de l'inscription.");
+          btn.disabled = false;
+          btn.textContent = "✦ Commencer l'aventure";
+        } else {
+          showOk("Compte créé ! Vérifiez votre email puis connectez-vous.");
+          btn.disabled = false;
+          btn.textContent = "✦ Commencer l'aventure";
+          setTimeout(() => switchTab("login"), 2500);
+        }
+      }
+    </script>
+  </body>
+</html>
