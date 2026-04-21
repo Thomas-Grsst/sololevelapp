@@ -202,18 +202,3 @@ async function saveUrgentTaskProgress(
     completed,
   );
 }
-const { data, error } = await getSupabase()
-  .from("task_progress")
-  .upsert(
-    {
-      player_id: userId,
-      quest_id: questId,
-      task_id: taskId,
-      day_key: dayKey,
-      value,
-      completed,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "player_id,quest_id,task_id,day_key" },
-  );
-return { data, error };
