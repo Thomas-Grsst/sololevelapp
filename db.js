@@ -1,204 +1,106 @@
 // ============================================================
-// SOLO LEVELING — Supabase DB Layer
+// SOLO LEVELING v3 — DB Layer
 // ============================================================
-
-let _supabase = null;
-
-function getSupabase() {
-  if (!_supabase) {
-    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return _supabase;
+let _sb = null;
+function sb() {
+  if (!_sb) _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _sb;
 }
 
-// ── Auth ─────────────────────────────────────────────────────
-
-async function signUp(email, password, username) {
-  const sb = getSupabase();
-  const { data, error } = await sb.auth.signUp({
-    email,
-    password,
-    options: { data: { username } },
-  });
-  return { data, error };
+// ── Auth ──────────────────────────────────────────────────────
+async function authSignUp(email, password, username) {
+  return sb().auth.signUp({ email, password, options: { data: { username } } });
 }
-
-async function signIn(email, password) {
-  const sb = getSupabase();
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  return { data, error };
+async function authSignIn(email, password) {
+  return sb().auth.signInWithPassword({ email, password });
 }
-
-async function signOut() {
-  const sb = getSupabase();
-  await sb.auth.signOut();
-}
-
-async function getSession() {
-  const sb = getSupabase();
-  const {
-    data: { session },
-  } = await sb.auth.getSession();
+async function authSignOut() { return sb().auth.signOut(); }
+async function authSession() {
+  const { data: { session } } = await sb().auth.getSession();
   return session;
 }
 
-function onAuthChange(callback) {
-  getSupabase().auth.onAuthStateChange(callback);
-}
-
 // ── Player ────────────────────────────────────────────────────
-
-async function loadPlayer(userId) {
-  const { data, error } = await getSupabase()
-    .from("players")
-    .select("*")
-    .eq("id", userId)
-    .single();
-  return { data, error };
+async function dbLoadPlayer(uid) {
+  return sb().from('players').select('*').eq('id', uid).single();
 }
 
-async function savePlayer(userId, fields) {
-  const { data, error } = await getSupabase()
-    .from("players")
+// Atomic upsert — saves everything in one call to prevent data loss
+async function dbSavePlayer(uid, fields) {
+  const { data, error } = await sb()
+    .from('players')
     .update({ ...fields, updated_at: new Date().toISOString() })
-    .eq("id", userId)
-    .select()
+    .eq('id', uid)
+    .select('*')
     .single();
+  if (error) console.error('dbSavePlayer error', error);
   return { data, error };
 }
 
 // ── Quest completions ─────────────────────────────────────────
-
-async function loadQuestCompletions(userId, dayKey) {
-  const { data, error } = await getSupabase()
-    .from("quest_completions")
-    .select("quest_id")
-    .eq("player_id", userId)
-    .eq("day_key", dayKey);
-  return { data, error };
+async function dbLoadQuestCompletions(uid, dayKey) {
+  return sb().from('quest_completions').select('quest_id').eq('player_id', uid).eq('day_key', dayKey);
 }
-
-async function markQuestComplete(userId, questId, dayKey) {
-  const { data, error } = await getSupabase()
-    .from("quest_completions")
-    .upsert(
-      { player_id: userId, quest_id: questId, day_key: dayKey },
-      { onConflict: "player_id,quest_id,day_key" },
-    );
-  return { data, error };
+async function dbMarkQuestDone(uid, questId, dayKey) {
+  return sb().from('quest_completions').upsert(
+    { player_id: uid, quest_id: questId, day_key: dayKey },
+    { onConflict: 'player_id,quest_id,day_key' }
+  );
 }
 
 // ── Task progress ─────────────────────────────────────────────
-
-async function loadTaskProgress(userId, dayKey) {
-  const { data, error } = await getSupabase()
-    .from("task_progress")
-    .select("*")
-    .eq("player_id", userId)
-    .eq("day_key", dayKey);
-  return { data, error };
+async function dbLoadTasks(uid, dayKey) {
+  return sb().from('task_progress').select('*').eq('player_id', uid).eq('day_key', dayKey);
 }
-
-// ── Titles ────────────────────────────────────────────────────
-
-async function loadUnlockedTitles(userId) {
-  const { data, error } = await getSupabase()
-    .from("players")
-    .select("unlocked_titles, active_title")
-    .eq("id", userId)
-    .single();
-  return { data, error };
-}
-
-async function saveActiveTitle(userId, titleId) {
-  const { data, error } = await getSupabase()
-    .from("players")
-    .update({ active_title: titleId, updated_at: new Date().toISOString() })
-    .eq("id", userId);
-  return { data, error };
-}
-
-// ── Urgent Quests ─────────────────────────────────────────────
-
-async function loadActiveUrgentQuest(userId) {
-  const { data, error } = await getSupabase()
-    .from("urgent_quests")
-    .select("*")
-    .eq("player_id", userId)
-    .eq("completed", false)
-    .eq("failed", false)
-    .order("started_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return { data, error };
-}
-
-async function createUrgentQuestDB(userId, instance) {
-  const { data, error } = await getSupabase()
-    .from("urgent_quests")
-    .insert({
-      player_id: userId,
-      instance_id: instance.instanceId,
-      quest_id: instance.questId,
-      started_at: new Date(instance.startedAt).toISOString(),
-      expires_at: new Date(
-        instance.startedAt + instance.timeLimitMs,
-      ).toISOString(),
-      completed: false,
-      failed: false,
-    });
-  return { data, error };
-}
-
-async function completeUrgentQuestDB(userId, instanceId) {
-  const { data, error } = await getSupabase()
-    .from("urgent_quests")
-    .update({ completed: true })
-    .eq("player_id", userId)
-    .eq("instance_id", instanceId);
-  return { data, error };
-}
-
-async function failUrgentQuestDB(userId, instanceId) {
-  const { data, error } = await getSupabase()
-    .from("urgent_quests")
-    .update({ failed: true })
-    .eq("player_id", userId)
-    .eq("instance_id", instanceId);
-  return { data, error };
-}
-
-async function countCompletedUrgentQuests(userId) {
-  const { count, error } = await getSupabase()
-    .from("urgent_quests")
-    .select("*", { count: "exact", head: true })
-    .eq("player_id", userId)
-    .eq("completed", true);
-  return { count: count || 0, error };
-}
-
-async function loadUrgentTaskProgress(userId, instanceId) {
-  const { data, error } = await getSupabase()
-    .from("task_progress")
-    .select("*")
-    .eq("player_id", userId)
-    .eq("day_key", "urgent_" + instanceId);
-  return { data, error };
-}
-
-async function saveUrgentTaskProgress(
-  userId,
-  instanceId,
-  taskId,
-  value,
-  completed,
-) {
-  return saveTaskProgress(
-    userId,
-    "urgent",
-    taskId,
-    "urgent_" + instanceId,
-    value,
-    completed,
+async function dbSaveTask(uid, questId, taskId, dayKey, value, completed) {
+  return sb().from('task_progress').upsert(
+    { player_id: uid, quest_id: questId, task_id: taskId, day_key: dayKey, value, completed, updated_at: new Date().toISOString() },
+    { onConflict: 'player_id,quest_id,task_id,day_key' }
   );
+}
+
+// ── Urgent quests ─────────────────────────────────────────────
+async function dbLoadTodayUrgent(uid, dayKey) {
+  return sb().from('urgent_quests').select('*').eq('player_id', uid).eq('day_key', dayKey).maybeSingle();
+}
+async function dbCreateUrgent(uid, inst, dayKey) {
+  return sb().from('urgent_quests').insert({
+    player_id: uid,
+    instance_id: inst.instanceId,
+    quest_id: inst.questId,
+    day_key: dayKey,
+    started_at: new Date(inst.startedAt).toISOString(),
+    expires_at: new Date(inst.startedAt + inst.timeLimitMs).toISOString(),
+  });
+}
+async function dbCompleteUrgent(uid, dayKey) {
+  return sb().from('urgent_quests').update({ completed: true }).eq('player_id', uid).eq('day_key', dayKey);
+}
+async function dbFailUrgent(uid, dayKey) {
+  return sb().from('urgent_quests').update({ failed: true }).eq('player_id', uid).eq('day_key', dayKey);
+}
+
+// ── Friends ───────────────────────────────────────────────────
+async function dbSearchPlayers(query) {
+  return sb().from('players').select('id,username,level,active_title,unlocked_titles,stats')
+    .ilike('username', `%${query}%`).limit(10);
+}
+async function dbGetFriends(uid) {
+  const { data, error } = await sb().from('friendships')
+    .select(`
+      id, status, requester_id, addressee_id,
+      requester:players!friendships_requester_id_fkey(id,username,level,active_title,streak,stats),
+      addressee:players!friendships_addressee_id_fkey(id,username,level,active_title,streak,stats)
+    `)
+    .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`);
+  return { data, error };
+}
+async function dbSendFriendRequest(requesterId, addresseeId) {
+  return sb().from('friendships').insert({ requester_id: requesterId, addressee_id: addresseeId });
+}
+async function dbAcceptFriend(uid, friendshipId) {
+  return sb().from('friendships').update({ status: 'accepted' }).eq('id', friendshipId);
+}
+async function dbRemoveFriend(friendshipId) {
+  return sb().from('friendships').delete().eq('id', friendshipId);
 }

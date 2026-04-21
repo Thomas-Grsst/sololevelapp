@@ -113,3 +113,17 @@ E → D → C → B → A → S → SS → SSS → SSS+ → National → **Monar
 - Supabase Auth gère les sessions (JWT, refresh token auto)
 - Row Level Security activé → chaque joueur ne voit que ses données
 - `netlify.toml` configure les redirects pour la navigation entre pages
+
+* il faut ajouter des titres
+* une seule quete urgente par jour
+* une boutique
+* mettre la bar de navigation en bas
+* Ajouter une stats de richesse : par exemple travailler 10 min sur un business
+* Il faut qu'il soit possible d'aller au dessus du niveau 200
+* Il faut ajouter un spider chart avec les stats de la personne. Par exemple la force peut etre de niveau A mais l'intelligence de niveau B, cela dépendra de l'amélioration des stats
+* Ajout d'un streak/jour
+* Pénalité si un jour n'est pas fait (minimum 15 tasks). Pénalité d'exp reset au niveau actuelle, ex : si je suis au niveau 44 avec 300 exp, les 300 exp sont supprimé, mais je reste au niveau 44
+* Pour les points de stats faudrais juste reguler que 1 point allouer = 1 point de stats en plus et non 2
+
+* faudrais qu'on puisse ami avec d'autre player
+* il y a un petit probleme avec les taches qui quand on clique on est obligé d'aller sur un autre onglet avant de revenir pour qu'elle se valide, soit cocher
