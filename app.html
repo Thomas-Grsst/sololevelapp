@@ -1,2014 +1,594 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Solo Leveling</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script src="config.js"></script>
-    <script src="db.js"></script>
-    <script src="constants.js"></script>
-    <style>
-      * {
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
-      }
-      body {
-        margin: 0;
-        font-family: "Rajdhani", sans-serif;
-        background: #06060f;
-        color: #e8e4ff;
-        min-height: 100vh;
-        padding-bottom: 72px;
-      }
-      .bg-a {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        background:
-          radial-gradient(
-            ellipse 80% 50% at 50% -10%,
-            rgba(90, 80, 200, 0.18) 0%,
-            transparent 55%
-          ),
-          #06060f;
-        pointer-events: none;
-      }
-      .bg-g {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        background-image:
-          linear-gradient(rgba(139, 130, 232, 0.028) 1px, transparent 1px),
-          linear-gradient(
-            90deg,
-            rgba(139, 130, 232, 0.028) 1px,
-            transparent 1px
-          );
-        background-size: 60px 60px;
-        pointer-events: none;
-      }
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Solo Leveling</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+  <script src="db.js"></script>
+  <script src="constants.js"></script>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;font-family:'Rajdhani',sans-serif;background:#06060F;color:#E8E4FF;min-height:100vh;padding-bottom:72px}
+    .bg-a{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(90,80,200,.18) 0%,transparent 55%),#06060F;pointer-events:none}
+    .bg-g{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(139,130,232,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(139,130,232,.028) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
 
-      /* Bottom nav */
-      .bnav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 50;
-        background: rgba(6, 6, 15, 0.97);
-        backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(139, 130, 232, 0.14);
-        height: 64px;
-        display: flex;
-        align-items: stretch;
-      }
-      .ntab {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
-        background: transparent;
-        border: none;
-        color: rgba(232, 228, 255, 0.3);
-        font-family: "Rajdhani", sans-serif;
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        cursor: pointer;
-        transition: color 0.2s;
-        padding: 0;
-        text-transform: uppercase;
-        position: relative;
-      }
-      .ntab.on {
-        color: #8b82e8;
-      }
-      .ntab.on::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 25%;
-        right: 25%;
-        height: 2px;
-        background: #8b82e8;
-        border-radius: 0 0 3px 3px;
-      }
-      .ntab-icon {
-        font-size: 1.25rem;
-        line-height: 1;
-      }
+    /* Bottom nav */
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(6,6,15,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(139,130,232,.14);height:64px;display:flex;align-items:stretch}
+    .ntab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;border:none;color:rgba(232,228,255,.3);font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:color .2s;padding:0;text-transform:uppercase;position:relative}
+    .ntab.on{color:#8B82E8}
+    .ntab.on::after{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:#8B82E8;border-radius:0 0 3px 3px}
+    .ntab-icon{font-size:1.25rem;line-height:1}
 
-      /* Pages */
-      .page {
-        display: none;
-        min-height: calc(100vh - 64px);
-        padding: 14px 0 28px;
-        position: relative;
-        z-index: 10;
-      }
-      .page.on {
-        display: block;
-      }
-      .wrap {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 0 14px;
-      }
+    /* Pages */
+    .page{display:none;min-height:calc(100vh - 64px);padding:14px 0 28px;position:relative;z-index:10}
+    .page.on{display:block}
+    .wrap{max-width:860px;margin:0 auto;padding:0 14px}
 
-      /* Cards */
-      .card {
-        background: linear-gradient(145deg, #12122a, #0d0d1f);
-        border: 1px solid rgba(139, 130, 232, 0.15);
-        border-radius: 16px;
-        position: relative;
-        overflow: hidden;
-      }
-      .card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(139, 130, 232, 0.35),
-          transparent
-        );
-      }
-      .cp {
-        padding: 16px;
-      }
+    /* Cards */
+    .card{background:linear-gradient(145deg,#12122A,#0D0D1F);border:1px solid rgba(139,130,232,.15);border-radius:16px;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,130,232,.35),transparent)}
+    .cp{padding:16px}
 
-      /* Section label */
-      .slbl {
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        color: rgba(232, 228, 255, 0.28);
-        text-transform: uppercase;
-        margin: 18px 0 10px;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-      }
-      .slbl-bar {
-        width: 3px;
-        height: 11px;
-        border-radius: 2px;
-        flex-shrink: 0;
-      }
+    /* Section label */
+    .slbl{font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(232,228,255,.28);text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:7px}
+    .slbl-bar{width:3px;height:11px;border-radius:2px;flex-shrink:0}
 
-      /* EXP / stat bars */
-      .expbg {
-        height: 8px;
-        background: rgba(255, 255, 255, 0.07);
-        border-radius: 5px;
-        overflow: hidden;
-      }
-      .expfill {
-        height: 8px;
-        border-radius: 5px;
-        background: linear-gradient(90deg, #5a50c8, #8b82e8, #bdb5ff);
-        transition: width 0.5s;
-      }
-      .sbg {
-        height: 4px;
-        background: rgba(255, 255, 255, 0.07);
-        border-radius: 3px;
-        overflow: hidden;
-        margin-top: 7px;
-      }
-      .sfill {
-        height: 4px;
-        border-radius: 3px;
-        transition: width 0.4s;
-      }
+    /* EXP / stat bars */
+    .expbg{height:8px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden}
+    .expfill{height:8px;border-radius:5px;background:linear-gradient(90deg,#5A50C8,#8B82E8,#BDB5FF);transition:width .5s}
+    .sbg{height:4px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:7px}
+    .sfill{height:4px;border-radius:3px;transition:width .4s}
 
-      /* Quest cards */
-      .qcard {
-        background: linear-gradient(145deg, #12122a, #0d0d1f);
-        border: 1px solid rgba(139, 130, 232, 0.14);
-        border-radius: 16px;
-        overflow: hidden;
-        margin-bottom: 12px;
-      }
-      .qpbg {
-        height: 2px;
-        background: rgba(255, 255, 255, 0.07);
-      }
-      .qpfill {
-        height: 2px;
-        transition: width 0.3s;
-      }
+    /* Quest cards */
+    .qcard{background:linear-gradient(145deg,#12122A,#0D0D1F);border:1px solid rgba(139,130,232,.14);border-radius:16px;overflow:hidden;margin-bottom:12px}
+    .qpbg{height:2px;background:rgba(255,255,255,.07)}
+    .qpfill{height:2px;transition:width .3s}
 
-      /* Task rows */
-      .trow {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #1a1a35;
-        border-radius: 9px;
-        padding: 9px 12px;
-      }
-      .chk {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        border: 2px solid rgba(139, 130, 232, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        flex-shrink: 0;
-        transition: all 0.15s;
-        font-size: 12px;
-        font-weight: 700;
-        color: transparent;
-        user-select: none;
-      }
-      .chk.on {
-        background: #5a50c8;
-        border-color: #5a50c8;
-        color: #fff;
-      }
-      .rinp {
-        width: 58px;
-        background: #0d0d1f;
-        border: 1px solid rgba(139, 130, 232, 0.22);
-        border-radius: 7px;
-        padding: 5px 7px;
-        color: #e8e4ff;
-        font-family: "Rajdhani", sans-serif;
-        font-size: 14px;
-        font-weight: 600;
-        text-align: center;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .rinp:focus {
-        border-color: #8b82e8;
-      }
-      .tcircle {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: 2px solid rgba(139, 130, 232, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        background: #0d0d1f;
-        font-size: 11px;
-        font-weight: 700;
-        color: rgba(232, 228, 255, 0.45);
-        transition: all 0.2s;
-      }
-      .tbtn {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 1.5px solid;
-        background: transparent;
-        cursor: pointer;
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-        flex-shrink: 0;
-      }
-      .tbarbg {
-        height: 3px;
-        background: rgba(255, 255, 255, 0.07);
-        border-radius: 2px;
-        margin-top: 5px;
-        overflow: hidden;
-      }
-      .tbarfill {
-        height: 3px;
-        border-radius: 2px;
-        transition: width 0.4s;
-      }
+    /* Task rows */
+    .trow{display:flex;align-items:center;gap:10px;background:#1A1A35;border-radius:9px;padding:9px 12px}
+    .chk{width:24px;height:24px;border-radius:50%;border:2px solid rgba(139,130,232,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;font-size:12px;font-weight:700;color:transparent;user-select:none}
+    .chk.on{background:#5A50C8;border-color:#5A50C8;color:#fff}
+    .rinp{width:58px;background:#0D0D1F;border:1px solid rgba(139,130,232,.22);border-radius:7px;padding:5px 7px;color:#E8E4FF;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;text-align:center;outline:none;transition:border-color .2s}
+    .rinp:focus{border-color:#8B82E8}
+    .tcircle{width:50px;height:50px;border-radius:50%;border:2px solid rgba(139,130,232,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#0D0D1F;font-size:11px;font-weight:700;color:rgba(232,228,255,.45);transition:all .2s}
+    .tbtn{width:32px;height:32px;border-radius:50%;border:1.5px solid;background:transparent;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+    .tbarbg{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:5px;overflow:hidden}
+    .tbarfill{height:3px;border-radius:2px;transition:width .4s}
 
-      /* Buttons */
-      .cbtn {
-        width: 100%;
-        background: linear-gradient(135deg, #5a50c8, #8b82e8);
-        border: none;
-        border-radius: 9px;
-        padding: 10px;
-        color: #fff;
-        font-family: "Rajdhani", sans-serif;
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition:
-          opacity 0.2s,
-          box-shadow 0.2s;
-        text-transform: uppercase;
-        margin-top: 10px;
-      }
-      .cbtn:hover:not(:disabled) {
-        opacity: 0.88;
-        box-shadow: 0 0 14px rgba(139, 130, 232, 0.35);
-      }
-      .cbtn:disabled {
-        opacity: 0.25;
-        cursor: not-allowed;
-        background: rgba(139, 130, 232, 0.2);
-      }
+    /* Buttons */
+    .cbtn{width:100%;background:linear-gradient(135deg,#5A50C8,#8B82E8);border:none;border-radius:9px;padding:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:opacity .2s,box-shadow .2s;text-transform:uppercase;margin-top:10px}
+    .cbtn:hover:not(:disabled){opacity:.88;box-shadow:0 0 14px rgba(139,130,232,.35)}
+    .cbtn:disabled{opacity:.25;cursor:not-allowed;background:rgba(139,130,232,.2)}
 
-      /* Title cards */
-      .tcrd {
-        border-radius: 12px;
-        padding: 11px 13px;
-        border: 1px solid;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.2s;
-        user-select: none;
-      }
-      .tcrd:not(.lk):hover {
-        transform: translateY(-1px);
-        cursor: pointer;
-      }
-      .tcrd.lk {
-        opacity: 0.35;
-        filter: grayscale(0.5);
-      }
-      .tcrd.act::after {
-        content: "ACTIF";
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        color: inherit;
-      }
+    /* Title cards */
+    .tcrd{border-radius:12px;padding:11px 13px;border:1px solid;position:relative;overflow:hidden;transition:all .2s;user-select:none}
+    .tcrd:not(.lk):hover{transform:translateY(-1px);cursor:pointer}
+    .tcrd.lk{opacity:.35;filter:grayscale(.5)}
+    .tcrd.act::after{content:'ACTIF';position:absolute;top:6px;right:8px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:inherit}
 
-      /* Friends */
-      .friend-row {
-        background: #12122a;
-        border: 1px solid rgba(139, 130, 232, 0.12);
-        border-radius: 12px;
-        padding: 11px 14px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-      }
+    /* Friends */
+    .friend-row{background:#12122A;border:1px solid rgba(139,130,232,.12);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
 
-      /* Modals */
-      .modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 80;
-        background: rgba(0, 0, 0, 0.82);
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-      }
-      .modal.on {
-        display: flex;
-      }
-      .mbox {
-        background: linear-gradient(145deg, #12122a, #0d0d1f);
-        border-radius: 18px;
-        padding: 24px;
-        width: 100%;
-        max-width: 480px;
-        max-height: 90vh;
-        overflow-y: auto;
-        position: relative;
-        border: 1px solid rgba(139, 130, 232, 0.28);
-      }
-      .mbox::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(139, 130, 232, 0.5),
-          transparent
-        );
-      }
+    /* Modals */
+    .modal{display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:16px}
+    .modal.on{display:flex}
+    .mbox{background:linear-gradient(145deg,#12122A,#0D0D1F);border-radius:18px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;border:1px solid rgba(139,130,232,.28)}
+    .mbox::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,130,232,.5),transparent)}
 
-      /* Urgent strip */
-      .ustrip {
-        position: fixed;
-        bottom: 64px;
-        left: 0;
-        right: 0;
-        z-index: 45;
-        background: linear-gradient(90deg, #1c0505, #120512);
-        border-top: 1px solid rgba(224, 98, 60, 0.4);
-        padding: 10px 16px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transform: translateY(100%);
-        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-        cursor: pointer;
-      }
-      .ustrip.on {
-        transform: translateY(0);
-      }
-      .upulse {
-        animation: upl 1.5s ease-in-out infinite;
-      }
-      @keyframes upl {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.4;
-        }
-      }
+    /* Urgent strip */
+    .ustrip{position:fixed;bottom:64px;left:0;right:0;z-index:45;background:linear-gradient(90deg,#1C0505,#120512);border-top:1px solid rgba(224,98,60,.4);padding:10px 16px;display:flex;align-items:center;gap:12px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);cursor:pointer}
+    .ustrip.on{transform:translateY(0)}
+    .upulse{animation:upl 1.5s ease-in-out infinite}
+    @keyframes upl{0%,100%{opacity:1}50%{opacity:.4}}
 
-      /* Alloc controls */
-      .actrl {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border: 1px solid rgba(139, 130, 232, 0.28);
-        background: transparent;
-        color: #e8e4ff;
-        font-size: 16px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.18s;
-      }
-      .actrl:hover:not(:disabled) {
-        background: rgba(139, 130, 232, 0.14);
-      }
-      .actrl:disabled {
-        opacity: 0.2;
-        cursor: not-allowed;
-      }
+    /* Alloc controls */
+    .actrl{width:30px;height:30px;border-radius:50%;border:1px solid rgba(139,130,232,.28);background:transparent;color:#E8E4FF;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+    .actrl:hover:not(:disabled){background:rgba(139,130,232,.14)}
+    .actrl:disabled{opacity:.2;cursor:not-allowed}
 
-      /* Popins */
-      @keyframes popIn {
-        from {
-          transform: scale(0.4);
-          opacity: 0;
-        }
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      .pop {
-        animation: popIn 0.35s ease;
-      }
+    /* Popins */
+    @keyframes popIn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+    .pop{animation:popIn .35s ease}
 
-      /* Trial card banner */
-      .trial-banner {
-        border-radius: 14px;
-        overflow: hidden;
-        margin-bottom: 14px;
-        cursor: pointer;
-        transition: transform 0.15s;
-      }
-      .trial-banner:hover {
-        transform: translateY(-2px);
-      }
+    /* Trial card banner */
+    .trial-banner{border-radius:14px;overflow:hidden;margin-bottom:14px;cursor:pointer;transition:transform .15s}
+    .trial-banner:hover{transform:translateY(-2px)}
 
-      /* Loader */
-      .loader {
-        position: fixed;
-        inset: 0;
-        z-index: 200;
-        background: #06060f;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 14px;
-      }
-      .spin {
-        width: 34px;
-        height: 34px;
-        border: 3px solid rgba(139, 130, 232, 0.18);
-        border-top-color: #8b82e8;
-        border-radius: 50%;
-        animation: sp 0.8s linear infinite;
-      }
-      @keyframes sp {
-        to {
-          transform: rotate(360deg);
-        }
-      }
+    /* Loader */
+    .loader{position:fixed;inset:0;z-index:200;background:#06060F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+    .spin{width:34px;height:34px;border:3px solid rgba(139,130,232,.18);border-top-color:#8B82E8;border-radius:50%;animation:sp .8s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
 
-      .toast {
-        position: fixed;
-        top: 16px;
-        left: 50%;
-        transform: translateX(-50%) translateY(-80px);
-        z-index: 190;
-        background: #1a1a35;
-        border: 1px solid #5a50c8;
-        border-radius: 12px;
-        padding: 10px 18px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #bdb5ff;
-        transition: transform 0.3s;
-        white-space: nowrap;
-        pointer-events: none;
-        max-width: 90vw;
-        text-align: center;
-      }
-      .toast.on {
-        transform: translateX(-50%) translateY(0);
-      }
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:190;background:#1A1A35;border:1px solid #5A50C8;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;color:#BDB5FF;transition:transform .3s;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
+    .toast.on{transform:translateX(-50%) translateY(0)}
 
-      .pen-modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 180;
-        background: rgba(0, 0, 0, 0.9);
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-      }
-      .pen-modal.on {
-        display: flex;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="loader" id="loader">
-      <div
-        style="
-          font-family: &quot;Cinzel&quot;, serif;
-          font-size: 1.1rem;
-          color: #8b82e8;
-          letter-spacing: 3px;
-        "
-      >
-        SOLO LEVELING
-      </div>
-      <div class="spin"></div>
-      <div
-        style="
-          font-size: 11px;
-          color: rgba(232, 228, 255, 0.2);
-          letter-spacing: 2px;
-        "
-      >
-        CHARGEMENT...
-      </div>
-    </div>
+    .pen-modal{display:none;position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.9);align-items:center;justify-content:center;padding:16px}
+    .pen-modal.on{display:flex}
+  </style>
+</head>
+<body>
+<div class="loader" id="loader">
+  <div style="font-family:'Cinzel',serif;font-size:1.1rem;color:#8B82E8;letter-spacing:3px">SOLO LEVELING</div>
+  <div class="spin"></div>
+  <div style="font-size:11px;color:rgba(232,228,255,.2);letter-spacing:2px">CHARGEMENT...</div>
+</div>
 
-    <div class="bg-a"></div>
-    <div class="bg-g"></div>
-    <div class="toast" id="toast"></div>
+<div class="bg-a"></div><div class="bg-g"></div>
+<div class="toast" id="toast"></div>
 
-    <!-- Urgent strip -->
-    <div class="ustrip" id="ustrip" onclick="openModal('um')">
-      <div style="font-size: 1.3rem" class="upulse" id="ustrip-icon">⚡</div>
-      <div style="flex: 1; min-width: 0">
-        <div
-          style="
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #e0623c;
-            font-family: &quot;Cinzel&quot;, serif;
-          "
-        >
-          QUÊTE URGENTE
-        </div>
-        <div
-          id="ustrip-title"
-          style="
-            font-size: 13px;
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          "
-        ></div>
-      </div>
-      <div
-        style="
-          font-family: &quot;Cinzel&quot;, serif;
-          font-size: 1rem;
-          font-weight: 800;
-          color: #e0623c;
-          flex-shrink: 0;
-        "
-        id="ustrip-timer"
-      >
-        00:00
-      </div>
-    </div>
+<!-- Urgent strip -->
+<div class="ustrip" id="ustrip" onclick="openModal('um')">
+  <div style="font-size:1.3rem" class="upulse" id="ustrip-icon">⚡</div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#E0623C;font-family:'Cinzel',serif">QUÊTE URGENTE</div>
+    <div id="ustrip-title" style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+  </div>
+  <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:800;color:#E0623C;flex-shrink:0" id="ustrip-timer">00:00</div>
+</div>
 
-    <!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      PAGE PROFIL
      ═══════════════════════════════════════════════════ -->
-    <div class="page on" id="p-profile">
-      <div class="wrap">
-        <!-- Hero card -->
-        <div class="card cp" id="hero-card" style="margin-bottom: 12px">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              gap: 10px;
-              flex-wrap: wrap;
-            "
-          >
-            <div style="flex: 1; min-width: 0">
-              <div
-                id="rank-badge"
-                style="
-                  display: inline-block;
-                  font-size: 10px;
-                  font-weight: 700;
-                  letter-spacing: 2px;
-                  padding: 2px 10px;
-                  border-radius: 20px;
-                  border: 1px solid;
-                  font-family: &quot;Cinzel&quot;, serif;
-                  margin-bottom: 7px;
-                "
-              ></div>
-              <div
-                style="
-                  font-family: &quot;Cinzel&quot;, serif;
-                  font-size: 1.4rem;
-                  font-weight: 900;
-                  color: #e8e4ff;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                "
-                id="hero-name"
-              >
-                JOUEUR
-              </div>
-              <div
-                id="hero-title-el"
-                style="
-                  font-size: 12px;
-                  font-style: italic;
-                  margin-top: 1px;
-                  display: none;
-                "
-              ></div>
-              <div
-                style="
-                  font-size: 12px;
-                  color: rgba(232, 228, 255, 0.35);
-                  margin-top: 3px;
-                "
-                id="hero-level"
-              >
-                Niveau 1
-              </div>
-            </div>
-            <div style="text-align: right; flex-shrink: 0">
-              <div id="streak-el" style="font-size: 13px; font-weight: 700">
-                🔥 0 jour
-              </div>
-              <div
-                style="
-                  font-size: 10px;
-                  color: rgba(232, 228, 255, 0.25);
-                  margin-top: 2px;
-                "
-                id="streak-sub"
-              ></div>
-            </div>
-          </div>
-          <div style="margin-top: 12px">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                font-size: 11px;
-                color: rgba(232, 228, 255, 0.3);
-                margin-bottom: 5px;
-              "
-            >
-              <span id="ec">0 EXP</span><span id="er">100 EXP</span>
-            </div>
-            <div class="expbg">
-              <div class="expfill" id="expbar" style="width: 0%"></div>
-            </div>
-            <div
-              id="nrt"
-              style="
-                font-size: 10px;
-                color: rgba(232, 228, 255, 0.2);
-                margin-top: 4px;
-                text-align: right;
-              "
-            ></div>
-          </div>
-        </div>
+<div class="page on" id="p-profile"><div class="wrap">
 
-        <!-- Trial banner (shown when player can do a rank trial) -->
-        <div id="trial-banner" style="display: none"></div>
+  <!-- Hero card -->
+  <div class="card cp" id="hero-card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div id="rank-badge" style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:2px;padding:2px 10px;border-radius:20px;border:1px solid;font-family:'Cinzel',serif;margin-bottom:7px"></div>
+        <div style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;color:#E8E4FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="hero-name">JOUEUR</div>
+        <div id="hero-title-el" style="font-size:12px;font-style:italic;margin-top:1px;display:none"></div>
+        <div style="font-size:12px;color:rgba(232,228,255,.35);margin-top:3px" id="hero-level">Niveau 1</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div id="streak-el" style="font-size:13px;font-weight:700">🔥 0 jour</div>
+        <div style="font-size:10px;color:rgba(232,228,255,.25);margin-top:2px" id="streak-sub"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(232,228,255,.3);margin-bottom:5px">
+        <span id="ec">0 EXP</span><span id="er">100 EXP</span>
+      </div>
+      <div class="expbg"><div class="expfill" id="expbar" style="width:0%"></div></div>
+      <div id="nrt" style="font-size:10px;color:rgba(232,228,255,.2);margin-top:4px;text-align:right"></div>
+    </div>
+  </div>
 
-        <!-- Points banner -->
-        <div
-          id="pts-banner"
-          style="display: none; margin-bottom: 12px; cursor: pointer"
-          onclick="openModal('am')"
-        >
-          <div
-            class="card cp"
-            style="
-              border-color: rgba(90, 80, 200, 0.4);
-              background: linear-gradient(
-                135deg,
-                rgba(90, 80, 200, 0.1),
-                rgba(13, 13, 31, 1)
-              );
-            "
-          >
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <div>
-                <div
-                  style="
-                    font-size: 10px;
-                    letter-spacing: 1px;
-                    color: rgba(232, 228, 255, 0.35);
-                    text-transform: uppercase;
-                  "
-                >
-                  Points disponibles
-                </div>
-                <div
-                  id="pts-val"
-                  style="font-size: 2rem; font-weight: 800; color: #8b82e8"
-                >
-                  0
-                </div>
-              </div>
-              <div style="text-align: right">
-                <div style="font-size: 13px; color: #8b82e8; font-weight: 600">
-                  Allouer →
-                </div>
-                <div
-                  style="
-                    font-size: 10px;
-                    color: rgba(232, 228, 255, 0.18);
-                    margin-top: 2px;
-                    font-style: italic;
-                  "
-                >
-                  Le Système vous accorde du pouvoir
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- Trial banner (shown when player can do a rank trial) -->
+  <div id="trial-banner" style="display:none"></div>
 
-        <!-- Spider chart -->
-        <div class="slbl">
-          <div class="slbl-bar" style="background: #8b82e8"></div>
-          RADAR DES ATTRIBUTS
+  <!-- Points banner -->
+  <div id="pts-banner" style="display:none;margin-bottom:12px;cursor:pointer" onclick="openModal('am')">
+    <div class="card cp" style="border-color:rgba(90,80,200,.4);background:linear-gradient(135deg,rgba(90,80,200,.1),rgba(13,13,31,1))">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:10px;letter-spacing:1px;color:rgba(232,228,255,.35);text-transform:uppercase">Points disponibles</div>
+          <div id="pts-val" style="font-size:2rem;font-weight:800;color:#8B82E8">0</div>
         </div>
-        <div
-          class="card cp"
-          style="margin-bottom: 4px; display: flex; justify-content: center"
-        >
-          <svg
-            id="spider-chart"
-            viewBox="0 0 320 320"
-            style="width: 100%; max-width: 320px; display: block"
-          ></svg>
-        </div>
-
-        <!-- Stats grid -->
-        <div class="slbl">
-          <div class="slbl-bar" style="background: #8b82e8"></div>
-          ATTRIBUTS
-        </div>
-        <div
-          id="stats-grid"
-          style="
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-            gap: 9px;
-            margin-bottom: 6px;
-          "
-        ></div>
-
-        <!-- Generals -->
-        <div class="slbl">
-          <div class="slbl-bar" style="background: #8b82e8"></div>
-          GÉNÉRALITÉS
-        </div>
-        <div class="card cp">
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(4, 1fr);
-              text-align: center;
-            "
-          >
-            <div>
-              <div
-                id="g-level"
-                style="font-size: 1.6rem; font-weight: 800; color: #8b82e8"
-              >
-                1
-              </div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                Niveau
-              </div>
-            </div>
-            <div style="border-left: 1px solid rgba(139, 130, 232, 0.1)">
-              <div
-                id="g-quests"
-                style="font-size: 1.6rem; font-weight: 800; color: #2ec4a0"
-              >
-                0
-              </div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                Quêtes
-              </div>
-            </div>
-            <div style="border-left: 1px solid rgba(139, 130, 232, 0.1)">
-              <div
-                id="g-streak"
-                style="font-size: 1.6rem; font-weight: 800; color: #e0623c"
-              >
-                0
-              </div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                Streak
-              </div>
-            </div>
-            <div style="border-left: 1px solid rgba(139, 130, 232, 0.1)">
-              <div
-                id="g-stats"
-                style="font-size: 1.6rem; font-weight: 800; color: #d4891a"
-              >
-                35
-              </div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                Stats
-              </div>
-            </div>
-          </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;color:#8B82E8;font-weight:600">Allouer →</div>
+          <div style="font-size:10px;color:rgba(232,228,255,.18);margin-top:2px;font-style:italic">Le Système vous accorde du pouvoir</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ═══════════════════════════════════════════════════
+  <!-- Spider chart -->
+  <div class="slbl"><div class="slbl-bar" style="background:#8B82E8"></div>RADAR DES ATTRIBUTS</div>
+  <div class="card cp" style="margin-bottom:4px;display:flex;justify-content:center">
+    <svg id="spider-chart" viewBox="0 0 320 320" style="width:100%;max-width:320px;display:block"></svg>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="slbl"><div class="slbl-bar" style="background:#8B82E8"></div>ATTRIBUTS</div>
+  <div id="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:9px;margin-bottom:6px"></div>
+
+  <!-- Generals -->
+  <div class="slbl"><div class="slbl-bar" style="background:#8B82E8"></div>GÉNÉRALITÉS</div>
+  <div class="card cp">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);text-align:center">
+      <div><div id="g-level" style="font-size:1.6rem;font-weight:800;color:#8B82E8">1</div><div style="font-size:9px;color:rgba(232,228,255,.28)">Niveau</div></div>
+      <div style="border-left:1px solid rgba(139,130,232,.1)"><div id="g-quests" style="font-size:1.6rem;font-weight:800;color:#2EC4A0">0</div><div style="font-size:9px;color:rgba(232,228,255,.28)">Quêtes</div></div>
+      <div style="border-left:1px solid rgba(139,130,232,.1)"><div id="g-streak" style="font-size:1.6rem;font-weight:800;color:#E0623C">0</div><div style="font-size:9px;color:rgba(232,228,255,.28)">Streak</div></div>
+      <div style="border-left:1px solid rgba(139,130,232,.1)"><div id="g-stats" style="font-size:1.6rem;font-weight:800;color:#D4891A">35</div><div style="font-size:9px;color:rgba(232,228,255,.28)">Stats</div></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- ═══════════════════════════════════════════════════
      PAGE QUÊTES
      ═══════════════════════════════════════════════════ -->
-    <div class="page" id="p-quests">
-      <div class="wrap">
-        <div class="card cp" style="margin-bottom: 12px">
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(3, 1fr);
-              text-align: center;
-            "
-          >
-            <div>
-              <div id="q-cnt" style="font-size: 1.4rem; font-weight: 800">
-                0/7
-              </div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                Quêtes du jour
-              </div>
-            </div>
-            <div
-              style="
-                border-left: 1px solid rgba(139, 130, 232, 0.1);
-                border-right: 1px solid rgba(139, 130, 232, 0.1);
-              "
-            >
-              <div
-                id="q-exp"
-                style="font-size: 1.4rem; font-weight: 800; color: #8b82e8"
-              >
-                +0
-              </div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                EXP gagnée
-              </div>
-            </div>
-            <div>
-              <div
-                id="q-date"
-                style="font-size: 0.85rem; font-weight: 700"
-              ></div>
-              <div style="font-size: 9px; color: rgba(232, 228, 255, 0.28)">
-                Aujourd'hui
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="quests-list"></div>
+<div class="page" id="p-quests"><div class="wrap">
+  <div class="card cp" style="margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center">
+      <div><div id="q-cnt" style="font-size:1.4rem;font-weight:800">0/7</div><div style="font-size:9px;color:rgba(232,228,255,.28)">Quêtes du jour</div></div>
+      <div style="border-left:1px solid rgba(139,130,232,.1);border-right:1px solid rgba(139,130,232,.1)">
+        <div id="q-exp" style="font-size:1.4rem;font-weight:800;color:#8B82E8">+0</div><div style="font-size:9px;color:rgba(232,228,255,.28)">EXP gagnée</div>
       </div>
+      <div><div id="q-date" style="font-size:.85rem;font-weight:700"></div><div style="font-size:9px;color:rgba(232,228,255,.28)">Aujourd'hui</div></div>
     </div>
+  </div>
+  <div id="quests-list"></div>
+</div></div>
 
-    <!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      PAGE TITRES
      ═══════════════════════════════════════════════════ -->
-    <div class="page" id="p-titles">
-      <div class="wrap">
-        <div
-          class="card cp"
-          id="title-hero"
-          style="margin-bottom: 12px; text-align: center"
-        >
-          <div
-            style="
-              font-size: 10px;
-              letter-spacing: 2px;
-              color: rgba(232, 228, 255, 0.22);
-              font-family: &quot;Cinzel&quot;, serif;
-              margin-bottom: 7px;
-            "
-          >
-            TITRE ACTIF
-          </div>
-          <div
-            id="active-title-lbl"
-            style="
-              font-size: 1.25rem;
-              font-weight: 700;
-              font-style: italic;
-              color: rgba(232, 228, 255, 0.22);
-            "
-          >
-            — Aucun —
-          </div>
-          <div
-            id="active-title-rar"
-            style="font-size: 11px; margin-top: 3px"
-          ></div>
-          <div
-            style="
-              font-size: 10px;
-              color: rgba(232, 228, 255, 0.18);
-              margin-top: 5px;
-            "
-          >
-            Cliquez sur un titre débloqué pour l'activer
-          </div>
-        </div>
-        <div class="card cp" style="margin-bottom: 4px">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 7px;
-            "
-          >
-            <div
-              style="
-                font-size: 10px;
-                font-weight: 700;
-                color: rgba(232, 228, 255, 0.3);
-                letter-spacing: 1px;
-                text-transform: uppercase;
-              "
-            >
-              Progression
-            </div>
-            <div
-              id="title-prog-txt"
-              style="font-size: 13px; font-weight: 700; color: #8b82e8"
-            ></div>
-          </div>
-          <div
-            style="
-              height: 5px;
-              background: rgba(255, 255, 255, 0.07);
-              border-radius: 3px;
-              overflow: hidden;
-            "
-          >
-            <div
-              id="title-prog-bar"
-              style="
-                height: 5px;
-                background: linear-gradient(90deg, #5a50c8, #8b82e8);
-                border-radius: 3px;
-                transition: width 0.5s;
-                width: 0%;
-              "
-            ></div>
-          </div>
-        </div>
-        <div id="titles-list"></div>
-      </div>
+<div class="page" id="p-titles"><div class="wrap">
+  <div class="card cp" id="title-hero" style="margin-bottom:12px;text-align:center">
+    <div style="font-size:10px;letter-spacing:2px;color:rgba(232,228,255,.22);font-family:'Cinzel',serif;margin-bottom:7px">TITRE ACTIF</div>
+    <div id="active-title-lbl" style="font-size:1.25rem;font-weight:700;font-style:italic;color:rgba(232,228,255,.22)">— Aucun —</div>
+    <div id="active-title-rar" style="font-size:11px;margin-top:3px"></div>
+    <div style="font-size:10px;color:rgba(232,228,255,.18);margin-top:5px">Cliquez sur un titre débloqué pour l'activer</div>
+  </div>
+  <div class="card cp" style="margin-bottom:4px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+      <div style="font-size:10px;font-weight:700;color:rgba(232,228,255,.3);letter-spacing:1px;text-transform:uppercase">Progression</div>
+      <div id="title-prog-txt" style="font-size:13px;font-weight:700;color:#8B82E8"></div>
     </div>
+    <div style="height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
+      <div id="title-prog-bar" style="height:5px;background:linear-gradient(90deg,#5A50C8,#8B82E8);border-radius:3px;transition:width .5s;width:0%"></div>
+    </div>
+  </div>
+  <div id="titles-list"></div>
+</div></div>
 
-    <!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      PAGE AMIS
      ═══════════════════════════════════════════════════ -->
-    <div class="page" id="p-friends">
-      <div class="wrap">
-        <div class="card cp" style="margin-bottom: 12px">
-          <div
-            style="
-              font-size: 10px;
-              font-weight: 700;
-              letter-spacing: 1px;
-              color: rgba(232, 228, 255, 0.3);
-              text-transform: uppercase;
-              margin-bottom: 8px;
-            "
-          >
-            Rechercher un joueur
-          </div>
-          <input
-            id="friend-search"
-            type="text"
-            placeholder="Nom du joueur..."
-            oninput="searchPlayers()"
-            style="
-              width: 100%;
-              background: rgba(255, 255, 255, 0.04);
-              border: 1px solid rgba(139, 130, 232, 0.22);
-              border-radius: 9px;
-              padding: 9px 13px;
-              color: #e8e4ff;
-              font-family: &quot;Rajdhani&quot;, sans-serif;
-              font-size: 14px;
-              outline: none;
-            "
-          />
-          <div id="search-results" style="margin-top: 10px"></div>
-        </div>
-        <div class="slbl">
-          <div class="slbl-bar" style="background: #8b82e8"></div>
-          MES AMIS
-        </div>
-        <div id="friends-list"></div>
-      </div>
-    </div>
+<div class="page" id="p-friends"><div class="wrap">
+  <div class="card cp" style="margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(232,228,255,.3);text-transform:uppercase;margin-bottom:8px">Rechercher un joueur</div>
+    <input id="friend-search" type="text" placeholder="Nom du joueur..." oninput="searchPlayers()"
+      style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(139,130,232,.22);border-radius:9px;padding:9px 13px;color:#E8E4FF;font-family:'Rajdhani',sans-serif;font-size:14px;outline:none"/>
+    <div id="search-results" style="margin-top:10px"></div>
+  </div>
+  <div class="slbl"><div class="slbl-bar" style="background:#8B82E8"></div>MES AMIS</div>
+  <div id="friends-list"></div>
+</div></div>
 
-    <!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      PAGE RANGS
      ═══════════════════════════════════════════════════ -->
-    <div class="page" id="p-ranks">
-      <div class="wrap">
-        <div
-          class="card cp"
-          id="rank-hero"
-          style="margin-bottom: 16px; text-align: center"
-        >
-          <div
-            style="
-              font-size: 10px;
-              letter-spacing: 3px;
-              color: rgba(232, 228, 255, 0.22);
-              font-family: &quot;Cinzel&quot;, serif;
-              margin-bottom: 7px;
-            "
-          >
-            RANG ACTUEL
-          </div>
-          <div
-            id="rh-name"
-            style="
-              font-family: &quot;Cinzel&quot;, serif;
-              font-size: 2.6rem;
-              font-weight: 900;
-              letter-spacing: 4px;
-              margin-bottom: 5px;
-            "
-          ></div>
-          <div
-            id="rh-level"
-            style="font-size: 13px; color: rgba(232, 228, 255, 0.4)"
-          ></div>
-          <div
-            id="rh-next"
-            style="
-              font-size: 11px;
-              color: rgba(232, 228, 255, 0.22);
-              margin-top: 5px;
-            "
-          ></div>
-        </div>
-        <div class="slbl">
-          <div class="slbl-bar" style="background: #8b82e8"></div>
-          HIÉRARCHIE
-        </div>
-        <div id="ranks-list"></div>
-      </div>
-    </div>
+<div class="page" id="p-ranks"><div class="wrap">
+  <div class="card cp" id="rank-hero" style="margin-bottom:16px;text-align:center">
+    <div style="font-size:10px;letter-spacing:3px;color:rgba(232,228,255,.22);font-family:'Cinzel',serif;margin-bottom:7px">RANG ACTUEL</div>
+    <div id="rh-name" style="font-family:'Cinzel',serif;font-size:2.6rem;font-weight:900;letter-spacing:4px;margin-bottom:5px"></div>
+    <div id="rh-level" style="font-size:13px;color:rgba(232,228,255,.4)"></div>
+    <div id="rh-next" style="font-size:11px;color:rgba(232,228,255,.22);margin-top:5px"></div>
+  </div>
+  <div class="slbl"><div class="slbl-bar" style="background:#8B82E8"></div>HIÉRARCHIE</div>
+  <div id="ranks-list"></div>
+</div></div>
 
-    <!-- ═══════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════
      MODALS
      ═══════════════════════════════════════════════════ -->
 
-    <!-- Alloc -->
-    <div class="modal" id="am" onclick="closeModalOut(event, 'am')">
-      <div class="mbox">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-          "
-        >
-          <div
-            style="
-              font-family: &quot;Cinzel&quot;, serif;
-              font-size: 1rem;
-              font-weight: 700;
-            "
-          >
-            Allouer des points
-          </div>
-          <button
-            onclick="closeModal('am')"
-            style="
-              background: transparent;
-              border: none;
-              color: rgba(232, 228, 255, 0.35);
-              font-size: 20px;
-              cursor: pointer;
-            "
-          >
-            ×
-          </button>
-        </div>
-        <div
-          id="alloc-left"
-          style="
-            font-size: 12px;
-            color: rgba(232, 228, 255, 0.3);
-            margin-bottom: 16px;
-          "
-        ></div>
-        <div id="alloc-rows"></div>
-        <button
-          onclick="confirmAlloc()"
-          style="
-            width: 100%;
-            margin-top: 14px;
-            background: linear-gradient(135deg, #5a50c8, #8b82e8);
-            border: none;
-            border-radius: 9px;
-            padding: 11px;
-            color: #fff;
-            font-family: &quot;Rajdhani&quot;, sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            text-transform: uppercase;
-          "
-        >
-          Confirmer
-        </button>
-      </div>
+<!-- Alloc -->
+<div class="modal" id="am" onclick="closeModalOut(event,'am')">
+  <div class="mbox">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:700">Allouer des points</div>
+      <button onclick="closeModal('am')" style="background:transparent;border:none;color:rgba(232,228,255,.35);font-size:20px;cursor:pointer">×</button>
     </div>
+    <div id="alloc-left" style="font-size:12px;color:rgba(232,228,255,.3);margin-bottom:16px"></div>
+    <div id="alloc-rows"></div>
+    <button onclick="confirmAlloc()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#5A50C8,#8B82E8);border:none;border-radius:9px;padding:11px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase">Confirmer</button>
+  </div>
+</div>
 
-    <!-- Level up -->
-    <div class="modal" id="lum">
-      <div class="mbox pop" style="text-align: center; max-width: 320px">
-        <div style="display: flex; align-items: center; margin-bottom: 12px">
-          <div
-            style="
-              flex: 1;
-              height: 1px;
-              background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(139, 130, 232, 0.4)
-              );
-            "
-          ></div>
-          <span
-            id="lu-deco"
-            style="font-size: 12px; margin: 0 10px; color: #8b82e8"
-            >◆</span
-          >
-          <div
-            style="
-              flex: 1;
-              height: 1px;
-              background: linear-gradient(
-                90deg,
-                rgba(139, 130, 232, 0.4),
-                transparent
-              );
-            "
-          ></div>
-        </div>
-        <div
-          style="
-            font-family: &quot;Cinzel&quot;, serif;
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: rgba(139, 130, 232, 0.6);
-            margin-bottom: 8px;
-          "
-        >
-          — SYSTÈME —
-        </div>
-        <div
-          style="
-            font-family: &quot;Cinzel&quot;, serif;
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: #e8e4ff;
-            letter-spacing: 2px;
-            margin-bottom: 16px;
-          "
-        >
-          NIVEAU SUPÉRIEUR !
-        </div>
-        <div
-          id="lu-circle"
-          style="
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 2px solid;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
-        >
-          <span
-            id="lu-num"
-            style="
-              font-family: &quot;Cinzel&quot;, serif;
-              font-size: 2rem;
-              font-weight: 900;
-            "
-          ></span>
-        </div>
-        <div
-          id="lu-rank"
-          style="
-            font-size: 12px;
-            letter-spacing: 2px;
-            font-family: &quot;Cinzel&quot;, serif;
-            margin-bottom: 16px;
-          "
-        ></div>
-        <div
-          style="
-            background: rgba(90, 80, 200, 0.1);
-            border: 1px solid rgba(90, 80, 200, 0.25);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 14px;
-          "
-        >
-          <div
-            style="
-              font-size: 9px;
-              letter-spacing: 1px;
-              color: rgba(232, 228, 255, 0.28);
-              text-transform: uppercase;
-              margin-bottom: 4px;
-            "
-          >
-            Récompenses
-          </div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #8b82e8">
-            +3 pts à allouer
-          </div>
-        </div>
-        <div id="lu-trial-notice" style="margin-bottom: 12px"></div>
-        <div id="lu-titles" style="margin-bottom: 12px"></div>
-        <button
-          onclick="closeLevelUp()"
-          style="
-            width: 100%;
-            background: linear-gradient(135deg, #5a50c8, #8b82e8);
-            border: none;
-            border-radius: 9px;
-            padding: 10px;
-            color: #fff;
-            font-family: &quot;Rajdhani&quot;, sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            text-transform: uppercase;
-          "
-        >
-          Continuer
-        </button>
-      </div>
+<!-- Level up -->
+<div class="modal" id="lum">
+  <div class="mbox pop" style="text-align:center;max-width:320px">
+    <div style="display:flex;align-items:center;margin-bottom:12px">
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(139,130,232,.4))"></div>
+      <span id="lu-deco" style="font-size:12px;margin:0 10px;color:#8B82E8">◆</span>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(139,130,232,.4),transparent)"></div>
     </div>
-
-    <!-- New title -->
-    <div class="modal" id="ntm">
-      <div
-        class="mbox pop"
-        id="ntm-box"
-        style="text-align: center; max-width: 300px"
-      >
-        <div id="ntm-icon" style="font-size: 2.5rem; margin-bottom: 10px"></div>
-        <div
-          style="
-            font-size: 9px;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
-            font-family: &quot;Cinzel&quot;, serif;
-            opacity: 0.5;
-          "
-        >
-          TITRE DÉBLOQUÉ
-        </div>
-        <div
-          id="ntm-label"
-          style="
-            font-family: &quot;Cinzel&quot;, serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-          "
-        ></div>
-        <div id="ntm-badge" style="margin-bottom: 8px"></div>
-        <div
-          id="ntm-desc"
-          style="font-size: 12px; opacity: 0.4; margin-bottom: 18px"
-        ></div>
-        <button
-          onclick="closeNewTitle()"
-          style="
-            width: 100%;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 9px;
-            padding: 10px;
-            color: #e8e4ff;
-            font-family: &quot;Rajdhani&quot;, sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 1px;
-          "
-        >
-          SUPER !
-        </button>
-      </div>
+    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:rgba(139,130,232,.6);margin-bottom:8px">— SYSTÈME —</div>
+    <div style="font-family:'Cinzel',serif;font-size:1.2rem;font-weight:900;color:#E8E4FF;letter-spacing:2px;margin-bottom:16px">NIVEAU SUPÉRIEUR !</div>
+    <div id="lu-circle" style="width:90px;height:90px;border-radius:50%;border:2px solid;margin:0 auto 10px;display:flex;align-items:center;justify-content:center">
+      <span id="lu-num" style="font-family:'Cinzel',serif;font-size:2rem;font-weight:900"></span>
     </div>
-
-    <!-- Urgent quest -->
-    <div class="modal" id="um">
-      <div
-        class="mbox"
-        style="max-width: 480px; border-color: rgba(224, 98, 60, 0.35)"
-      >
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-          "
-        >
-          <div>
-            <div
-              style="
-                font-size: 9px;
-                letter-spacing: 3px;
-                color: #e0623c;
-                font-family: &quot;Cinzel&quot;, serif;
-              "
-            >
-              — ALERTE SYSTÈME —
-            </div>
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                gap: 7px;
-                margin-top: 4px;
-              "
-            >
-              <span id="um-icon" style="font-size: 1.5rem"></span>
-              <span
-                id="um-title"
-                style="
-                  font-size: 14px;
-                  font-weight: 700;
-                  font-family: &quot;Cinzel&quot;, serif;
-                "
-              ></span>
-            </div>
-          </div>
-          <button
-            onclick="closeModal('um')"
-            style="
-              background: transparent;
-              border: none;
-              color: rgba(232, 228, 255, 0.3);
-              font-size: 20px;
-              cursor: pointer;
-            "
-          >
-            ×
-          </button>
-        </div>
-        <div
-          id="um-desc"
-          style="
-            font-size: 12px;
-            color: rgba(232, 228, 255, 0.42);
-            font-style: italic;
-            margin-bottom: 12px;
-            line-height: 1.5;
-          "
-        ></div>
-        <div
-          style="
-            background: rgba(224, 98, 60, 0.07);
-            border: 1px solid rgba(224, 98, 60, 0.22);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 12px;
-          "
-        >
-          <div
-            style="
-              font-size: 9px;
-              color: rgba(224, 98, 60, 0.55);
-              letter-spacing: 2px;
-              margin-bottom: 3px;
-            "
-          >
-            TEMPS RESTANT
-          </div>
-          <div
-            id="um-countdown"
-            style="
-              font-size: 1.8rem;
-              font-weight: 800;
-              color: #e0623c;
-              font-family: &quot;Cinzel&quot;, serif;
-              letter-spacing: 2px;
-            "
-          >
-            00:00
-          </div>
-        </div>
-        <div
-          id="um-tasks"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-bottom: 12px;
-          "
-        ></div>
-        <div id="um-btn"></div>
-      </div>
+    <div id="lu-rank" style="font-size:12px;letter-spacing:2px;font-family:'Cinzel',serif;margin-bottom:16px"></div>
+    <div style="background:rgba(90,80,200,.1);border:1px solid rgba(90,80,200,.25);border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:9px;letter-spacing:1px;color:rgba(232,228,255,.28);text-transform:uppercase;margin-bottom:4px">Récompenses</div>
+      <div style="font-size:1.6rem;font-weight:800;color:#8B82E8">+3 pts à allouer</div>
     </div>
+    <div id="lu-trial-notice" style="margin-bottom:12px"></div>
+    <div id="lu-titles" style="margin-bottom:12px"></div>
+    <button onclick="closeLevelUp()" style="width:100%;background:linear-gradient(135deg,#5A50C8,#8B82E8);border:none;border-radius:9px;padding:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase">Continuer</button>
+  </div>
+</div>
 
-    <!-- RANK TRIAL MODAL -->
-    <div class="modal" id="trialm" onclick="closeModalOut(event, 'trialm')">
-      <div
-        class="mbox"
-        id="trial-mbox"
-        style="max-width: 520px; max-height: 90vh"
-      >
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
-          "
-        >
-          <div>
-            <div
-              id="tm-subtitle"
-              style="
-                font-size: 9px;
-                letter-spacing: 3px;
-                font-family: &quot;Cinzel&quot;, serif;
-                opacity: 0.55;
-                margin-bottom: 5px;
-              "
-            ></div>
-            <div style="display: flex; align-items: center; gap: 8px">
-              <span id="tm-icon" style="font-size: 1.6rem"></span>
-              <span
-                id="tm-title"
-                style="
-                  font-family: &quot;Cinzel&quot;, serif;
-                  font-size: 1rem;
-                  font-weight: 700;
-                  color: #e8e4ff;
-                "
-              ></span>
-            </div>
-          </div>
-          <button
-            onclick="closeModal('trialm')"
-            style="
-              background: transparent;
-              border: none;
-              color: rgba(232, 228, 255, 0.3);
-              font-size: 20px;
-              cursor: pointer;
-              flex-shrink: 0;
-            "
-          >
-            ×
-          </button>
+<!-- New title -->
+<div class="modal" id="ntm">
+  <div class="mbox pop" id="ntm-box" style="text-align:center;max-width:300px">
+    <div id="ntm-icon" style="font-size:2.5rem;margin-bottom:10px"></div>
+    <div style="font-size:9px;letter-spacing:3px;margin-bottom:5px;font-family:'Cinzel',serif;opacity:.5">TITRE DÉBLOQUÉ</div>
+    <div id="ntm-label" style="font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;margin-bottom:4px"></div>
+    <div id="ntm-badge" style="margin-bottom:8px"></div>
+    <div id="ntm-desc" style="font-size:12px;opacity:.4;margin-bottom:18px"></div>
+    <button onclick="closeNewTitle()" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px;color:#E8E4FF;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px">SUPER !</button>
+  </div>
+</div>
+
+<!-- Urgent quest -->
+<div class="modal" id="um">
+  <div class="mbox" style="max-width:480px;border-color:rgba(224,98,60,.35)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:9px;letter-spacing:3px;color:#E0623C;font-family:'Cinzel',serif">— ALERTE SYSTÈME —</div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:4px">
+          <span id="um-icon" style="font-size:1.5rem"></span>
+          <span id="um-title" style="font-size:14px;font-weight:700;font-family:'Cinzel',serif"></span>
         </div>
-        <div
-          id="tm-lore"
-          style="
-            font-size: 12px;
-            font-style: italic;
-            color: rgba(232, 228, 255, 0.4);
-            line-height: 1.6;
-            margin-bottom: 14px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            border-left: 3px solid rgba(139, 130, 232, 0.3);
-          "
-        ></div>
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-          "
-        >
-          <div
-            style="
-              font-size: 10px;
-              font-weight: 700;
-              letter-spacing: 1px;
-              color: rgba(232, 228, 255, 0.3);
-              text-transform: uppercase;
-            "
-          >
-            Tâches de l'épreuve
-          </div>
-          <div
-            id="tm-exp"
-            style="font-size: 12px; font-weight: 700; color: #8b82e8"
-          ></div>
-        </div>
-        <div
-          id="tm-tasks"
-          style="
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-bottom: 14px;
-          "
-        ></div>
-        <div id="tm-btn"></div>
       </div>
+      <button onclick="closeModal('um')" style="background:transparent;border:none;color:rgba(232,228,255,.3);font-size:20px;cursor:pointer">×</button>
     </div>
+    <div id="um-desc" style="font-size:12px;color:rgba(232,228,255,.42);font-style:italic;margin-bottom:12px;line-height:1.5"></div>
+    <div style="background:rgba(224,98,60,.07);border:1px solid rgba(224,98,60,.22);border-radius:10px;padding:10px;text-align:center;margin-bottom:12px">
+      <div style="font-size:9px;color:rgba(224,98,60,.55);letter-spacing:2px;margin-bottom:3px">TEMPS RESTANT</div>
+      <div id="um-countdown" style="font-size:1.8rem;font-weight:800;color:#E0623C;font-family:'Cinzel',serif;letter-spacing:2px">00:00</div>
+    </div>
+    <div id="um-tasks" style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px"></div>
+    <div id="um-btn"></div>
+  </div>
+</div>
 
-    <!-- Penalty -->
-    <div class="pen-modal" id="pen-modal">
-      <div
-        class="mbox pop"
-        style="
-          text-align: center;
-          max-width: 340px;
-          border-color: rgba(224, 98, 60, 0.4);
-        "
-      >
-        <div style="font-size: 2.5rem; margin-bottom: 10px">⚠️</div>
-        <div
-          style="
-            font-family: &quot;Cinzel&quot;, serif;
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: #e0623c;
-            margin-bottom: 8px;
-          "
-        >
-          — LE SYSTÈME PUNIT —
+<!-- RANK TRIAL MODAL -->
+<div class="modal" id="trialm" onclick="closeModalOut(event,'trialm')">
+  <div class="mbox" id="trial-mbox" style="max-width:520px;max-height:90vh">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <div id="tm-subtitle" style="font-size:9px;letter-spacing:3px;font-family:'Cinzel',serif;opacity:.55;margin-bottom:5px"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="tm-icon" style="font-size:1.6rem"></span>
+          <span id="tm-title" style="font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:#E8E4FF"></span>
         </div>
-        <div
-          style="
-            font-family: &quot;Cinzel&quot;, serif;
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: #e8e4ff;
-            margin-bottom: 12px;
-          "
-        >
-          PÉNALITÉ APPLIQUÉE
-        </div>
-        <div
-          id="pen-text"
-          style="
-            font-size: 13px;
-            color: rgba(232, 228, 255, 0.5);
-            line-height: 1.6;
-            margin-bottom: 18px;
-          "
-        ></div>
-        <button
-          onclick="closePenalty()"
-          style="
-            width: 100%;
-            background: linear-gradient(135deg, #8a2a0a, #e0623c);
-            border: none;
-            border-radius: 9px;
-            padding: 11px;
-            color: #fff;
-            font-family: &quot;Rajdhani&quot;, sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 1px;
-          "
-        >
-          Accepter la punition
-        </button>
       </div>
+      <button onclick="closeModal('trialm')" style="background:transparent;border:none;color:rgba(232,228,255,.3);font-size:20px;cursor:pointer;flex-shrink:0">×</button>
     </div>
+    <div id="tm-lore" style="font-size:12px;font-style:italic;color:rgba(232,228,255,.4);line-height:1.6;margin-bottom:14px;padding:10px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid rgba(139,130,232,.3)"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(232,228,255,.3);text-transform:uppercase">Tâches de l'épreuve</div>
+      <div id="tm-exp" style="font-size:12px;font-weight:700;color:#8B82E8"></div>
+    </div>
+    <div id="tm-tasks" style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px"></div>
+    <div id="tm-btn"></div>
+  </div>
+</div>
 
-    <!-- ═══════════════════════════════════════════════════
+<!-- Penalty -->
+<div class="pen-modal" id="pen-modal">
+  <div class="mbox pop" style="text-align:center;max-width:340px;border-color:rgba(224,98,60,.4)">
+    <div style="font-size:2.5rem;margin-bottom:10px">⚠️</div>
+    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:#E0623C;margin-bottom:8px">— LE SYSTÈME PUNIT —</div>
+    <div style="font-family:'Cinzel',serif;font-size:1.2rem;font-weight:900;color:#E8E4FF;margin-bottom:12px">PÉNALITÉ APPLIQUÉE</div>
+    <div id="pen-text" style="font-size:13px;color:rgba(232,228,255,.5);line-height:1.6;margin-bottom:18px"></div>
+    <button onclick="closePenalty()" style="width:100%;background:linear-gradient(135deg,#8A2A0A,#E0623C);border:none;border-radius:9px;padding:11px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px">Accepter la punition</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
      BOTTOM NAV
      ═══════════════════════════════════════════════════ -->
-    <nav class="bnav">
-      <button class="ntab on" onclick="goPage('profile')" id="nav-profile">
-        <span class="ntab-icon">⚔️</span><span>Profil</span>
-      </button>
-      <button class="ntab" onclick="goPage('quests')" id="nav-quests">
-        <span class="ntab-icon">📋</span><span>Quêtes</span>
-      </button>
-      <button class="ntab" onclick="goPage('titles')" id="nav-titles">
-        <span class="ntab-icon">🏅</span><span>Titres</span>
-      </button>
-      <button class="ntab" onclick="goPage('friends')" id="nav-friends">
-        <span class="ntab-icon">👥</span><span>Amis</span>
-      </button>
-      <button class="ntab" onclick="goPage('ranks')" id="nav-ranks">
-        <span class="ntab-icon">👑</span><span>Rangs</span>
-      </button>
-      <button class="ntab" onclick="doLogout()" style="flex: 0.6">
-        <span class="ntab-icon" style="font-size: 1rem">🚪</span
-        ><span>Quitter</span>
-      </button>
-    </nav>
+<nav class="bnav">
+  <button class="ntab on" onclick="goPage('profile')" id="nav-profile"><span class="ntab-icon">⚔️</span><span>Profil</span></button>
+  <button class="ntab" onclick="goPage('quests')" id="nav-quests"><span class="ntab-icon">📋</span><span>Quêtes</span></button>
+  <button class="ntab" onclick="goPage('titles')" id="nav-titles"><span class="ntab-icon">🏅</span><span>Titres</span></button>
+  <button class="ntab" onclick="goPage('friends')" id="nav-friends"><span class="ntab-icon">👥</span><span>Amis</span></button>
+  <button class="ntab" onclick="goPage('ranks')" id="nav-ranks"><span class="ntab-icon">👑</span><span>Rangs</span></button>
+  <button class="ntab" onclick="doLogout()" style="flex:.6"><span class="ntab-icon" style="font-size:1rem">🚪</span><span>Quitter</span></button>
+</nav>
 
-    <script>
-      "use strict";
-      // ════════════════════════════════════════════════════════
-      // STATE
-      // ════════════════════════════════════════════════════════
-      let P = null,
-        UID = null,
-        TODAY = getTodayKey();
-      let completedQ = new Set(),
-        taskProg = {},
-        tmrs = {},
-        allocPend = {};
-      let urgentActive = null,
-        urgentTProg = {},
-        urgentCDInterval = null;
-      let trialTProg = {},
-        trialTmrs = {};
-      let titleQueue = [];
+<script>
+'use strict';
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let P=null, UID=null, TODAY=getTodayKey();
+let completedQ=new Set(), taskProg={}, tmrs={}, allocPend={};
+let urgentActive=null, urgentTProg={}, urgentCDInterval=null;
+let trialTProg={}, trialTmrs={};
+let titleQueue=[];
 
-      // ════════════════════════════════════════════════════════
-      // INIT
-      // ════════════════════════════════════════════════════════
-      async function init() {
-        const session = await authSession();
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+(async function init(){
+  const session=await authSession();
+  if(!session){window.location.href='index.html';return;}
+  UID=session.user.id;
+  await loadAll();
+  checkStreak();
+  document.getElementById('loader').style.display='none';
+  renderAll();
+  scheduleUrgent();
+})();
 
-        if (!session) {
-          window.location.href = "index.html";
-          return;
-        }
+async function loadAll(){
+  const [pr,qr,tr,ur]=await Promise.all([
+    dbLoadPlayer(UID),
+    dbLoadQuestCompletions(UID,TODAY),
+    dbLoadTasks(UID,TODAY),
+    dbLoadTodayUrgent(UID,TODAY),
+  ]);
+  if(!pr.data){toast('Erreur de chargement');return;}
+  P=pr.data;
+  if(!P.unlocked_titles) P.unlocked_titles=[];
+  if(!P.completed_trials) P.completed_trials=[];
+  if(!P.stats) P.stats={force:5,intelligence:5,agilite:5,endurance:5,perception:5,charisme:5,richesse:5};
+  if(!P.stats.richesse) P.stats.richesse=5;
+  if(!P.urgent_quests_completed) P.urgent_quests_completed=0;
+  if(!P.streak) P.streak=0;
 
-        let P = await getPlayer();
+  if(qr.data) qr.data.forEach(r=>completedQ.add(r.quest_id));
+  if(tr.data) tr.data.forEach(r=>{taskProg[r.quest_id+'_'+r.task_id]={value:r.value,completed:r.completed};});
 
-        if (!P) {
-          console.log("Player absent → création");
-          await createPlayer();
-          P = await getPlayer();
-        }
-
-        if (!P) {
-          console.error("Impossible de créer le player");
-          await authSignOut();
-          window.location.href = "index.html";
-          return;
-        }
-
-        // SAFE ici
-        checkStreak(P);
+  // Restore urgent
+  if(ur.data&&!ur.data.completed&&!ur.data.failed){
+    const exp=new Date(ur.data.expires_at).getTime();
+    if(Date.now()<exp){
+      const qd=URGENT_POOL.find(q=>q.id===ur.data.quest_id);
+      if(qd){
+        const instId=ur.data.instance_id;
+        const utR=await dbLoadTasks(UID,'urg_'+instId);
+        if(utR.data) utR.data.forEach(r=>{urgentTProg[r.task_id]={value:r.value,completed:r.completed};});
+        urgentActive={questDef:qd,instance:{instanceId:instId,questId:qd.id,startedAt:new Date(ur.data.started_at).getTime(),timeLimitMs:exp-new Date(ur.data.started_at).getTime()}};
+        startUrgentCD();
       }
+    } else { await dbFailUrgent(UID,TODAY); }
+  }
+}
 
-      async function loadAll() {
-        const [pr, qr, tr, ur] = await Promise.all([
-          dbLoadPlayer(UID),
-          dbLoadQuestCompletions(UID, TODAY),
-          dbLoadTasks(UID, TODAY),
-          dbLoadTodayUrgent(UID, TODAY),
-        ]);
-        if (!pr.data) {
-          toast("Erreur de chargement");
-          return;
-        }
-        P = pr.data;
-        if (!P.unlocked_titles) P.unlocked_titles = [];
-        if (!P.completed_trials) P.completed_trials = [];
-        if (!P.stats)
-          P.stats = {
-            force: 5,
-            intelligence: 5,
-            agilite: 5,
-            endurance: 5,
-            perception: 5,
-            charisme: 5,
-            richesse: 5,
-          };
-        if (!P.stats.richesse) P.stats.richesse = 5;
-        if (!P.urgent_quests_completed) P.urgent_quests_completed = 0;
-        if (!P.streak) P.streak = 0;
+// ════════════════════════════════════════════════════════
+// PERSIST (single atomic save)
+// ════════════════════════════════════════════════════════
+async function persist(){
+  await dbSavePlayer(UID,{
+    level:P.level,exp:P.exp,points:P.points,
+    total_quests_completed:P.total_quests_completed,
+    urgent_quests_completed:P.urgent_quests_completed,
+    streak:P.streak,last_active_day:P.last_active_day,
+    penalty_applied_day:P.penalty_applied_day,
+    completed_trials:P.completed_trials,
+    unlocked_titles:P.unlocked_titles,active_title:P.active_title,
+    stats:P.stats,
+  });
+}
 
-        if (qr.data) qr.data.forEach((r) => completedQ.add(r.quest_id));
-        if (tr.data)
-          tr.data.forEach((r) => {
-            taskProg[r.quest_id + "_" + r.task_id] = {
-              value: r.value,
-              completed: r.completed,
-            };
-          });
+// ════════════════════════════════════════════════════════
+// STREAK + PENALTY
+// ════════════════════════════════════════════════════════
+function checkStreak(){
+  const last=P.last_active_day, pen=P.penalty_applied_day;
+  if(!last||last===TODAY) return;
+  const diff=Math.round((dayFromKey(TODAY)-dayFromKey(last))/86400000);
+  if(diff===1) return;
+  if(diff>=2&&pen!==TODAY){
+    P.exp=0; P.streak=0; P.penalty_applied_day=TODAY;
+    setTimeout(()=>showPenaltyModal(diff-1),800);
+  }
+}
+function dayFromKey(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m,d);}
+function showPenaltyModal(days){
+  document.getElementById('pen-text').innerHTML=`Vous avez raté <strong style="color:#E0623C">${days} jour${days>1?'s':''}</strong> sans atteindre 15 tâches.<br><br>Le Système a effacé votre EXP du niveau actuel.<br><span style="font-size:11px;color:rgba(232,228,255,.35)">Niveau conservé — EXP remise à 0</span>`;
+  document.getElementById('pen-modal').classList.add('on');
+}
+async function closePenalty(){document.getElementById('pen-modal').classList.remove('on');await persist();renderProfile();}
 
-        // Restore urgent
-        if (ur.data && !ur.data.completed && !ur.data.failed) {
-          const exp = new Date(ur.data.expires_at).getTime();
-          if (Date.now() < exp) {
-            const qd = URGENT_POOL.find((q) => q.id === ur.data.quest_id);
-            if (qd) {
-              const instId = ur.data.instance_id;
-              const utR = await dbLoadTasks(UID, "urg_" + instId);
-              if (utR.data)
-                utR.data.forEach((r) => {
-                  urgentTProg[r.task_id] = {
-                    value: r.value,
-                    completed: r.completed,
-                  };
-                });
-              urgentActive = {
-                questDef: qd,
-                instance: {
-                  instanceId: instId,
-                  questId: qd.id,
-                  startedAt: new Date(ur.data.started_at).getTime(),
-                  timeLimitMs: exp - new Date(ur.data.started_at).getTime(),
-                },
-              };
-              startUrgentCD();
-            }
-          } else {
-            await dbFailUrgent(UID, TODAY);
-          }
-        }
-      }
+async function maybeUpdateStreak(){
+  const cnt=Object.values(taskProg).filter(t=>t.completed).length;
+  if(cnt<15||P.last_active_day===TODAY) return;
+  const last=P.last_active_day;
+  if(last){const diff=Math.round((dayFromKey(TODAY)-dayFromKey(last))/86400000);P.streak=(diff===1)?(P.streak||0)+1:1;}
+  else P.streak=1;
+  P.last_active_day=TODAY;
+  await persist();renderProfile();
+}
 
-      // ════════════════════════════════════════════════════════
-      // PERSIST (single atomic save)
-      // ════════════════════════════════════════════════════════
-      async function persist() {
-        await dbSavePlayer(UID, {
-          level: P.level,
-          exp: P.exp,
-          points: P.points,
-          total_quests_completed: P.total_quests_completed,
-          urgent_quests_completed: P.urgent_quests_completed,
-          streak: P.streak,
-          last_active_day: P.last_active_day,
-          penalty_applied_day: P.penalty_applied_day,
-          completed_trials: P.completed_trials,
-          unlocked_titles: P.unlocked_titles,
-          active_title: P.active_title,
-          stats: P.stats,
-        });
-      }
+// ════════════════════════════════════════════════════════
+// EXP + LEVEL UP
+// ════════════════════════════════════════════════════════
+async function gainExp(amount){
+  P.exp+=amount;
+  let leveled=false,lastLvl=0;
+  while(P.exp>=expRequired(P.level)){
+    P.exp-=expRequired(P.level);
+    P.level++; P.points+=3; leveled=true; lastLvl=P.level;
+  }
+  if(leveled) setTimeout(()=>showLevelUp(lastLvl),500);
+}
 
-      // ════════════════════════════════════════════════════════
-      // STREAK + PENALTY
-      // ════════════════════════════════════════════════════════
-      function checkStreak() {
-        const last = P.last_active_day,
-          pen = P.penalty_applied_day;
-        if (!last || last === TODAY) return;
-        const diff = Math.round(
-          (dayFromKey(TODAY) - dayFromKey(last)) / 86400000,
-        );
-        if (diff === 1) return;
-        if (diff >= 2 && pen !== TODAY) {
-          P.exp = 0;
-          P.streak = 0;
-          P.penalty_applied_day = TODAY;
-          setTimeout(() => showPenaltyModal(diff - 1), 800);
-        }
-      }
-      function dayFromKey(k) {
-        const [y, m, d] = k.split("-").map(Number);
-        return new Date(y, m, d);
-      }
-      function showPenaltyModal(days) {
-        document.getElementById("pen-text").innerHTML =
-          `Vous avez raté <strong style="color:#E0623C">${days} jour${days > 1 ? "s" : ""}</strong> sans atteindre 15 tâches.<br><br>Le Système a effacé votre EXP du niveau actuel.<br><span style="font-size:11px;color:rgba(232,228,255,.35)">Niveau conservé — EXP remise à 0</span>`;
-        document.getElementById("pen-modal").classList.add("on");
-      }
-      async function closePenalty() {
-        document.getElementById("pen-modal").classList.remove("on");
-        await persist();
-        renderProfile();
-      }
+function showLevelUp(level){
+  const rank=getRankForLevel(level);
+  document.getElementById('lu-num').textContent=level;
+  document.getElementById('lu-num').style.color=rank.color;
+  document.getElementById('lu-circle').style.borderColor=rank.color;
+  document.getElementById('lu-circle').style.background=rank.bg;
+  document.getElementById('lu-circle').style.boxShadow=`0 0 24px ${rank.glow}`;
+  document.getElementById('lu-rank').textContent=rank.name;
+  document.getElementById('lu-rank').style.color=rank.color;
+  document.getElementById('lu-deco').style.color=rank.color;
 
-      async function maybeUpdateStreak() {
-        const cnt = Object.values(taskProg).filter((t) => t.completed).length;
-        if (cnt < 15 || P.last_active_day === TODAY) return;
-        const last = P.last_active_day;
-        if (last) {
-          const diff = Math.round(
-            (dayFromKey(TODAY) - dayFromKey(last)) / 86400000,
-          );
-          P.streak = diff === 1 ? (P.streak || 0) + 1 : 1;
-        } else P.streak = 1;
-        P.last_active_day = TODAY;
-        await persist();
-        renderProfile();
-      }
-
-      // ════════════════════════════════════════════════════════
-      // EXP + LEVEL UP
-      // ════════════════════════════════════════════════════════
-      async function gainExp(amount) {
-        P.exp += amount;
-        let leveled = false,
-          lastLvl = 0;
-        while (P.exp >= expRequired(P.level)) {
-          P.exp -= expRequired(P.level);
-          P.level++;
-          P.points += 3;
-          leveled = true;
-          lastLvl = P.level;
-        }
-        if (leveled) setTimeout(() => showLevelUp(lastLvl), 500);
-      }
-
-      function showLevelUp(level) {
-        const rank = getRankForLevel(level);
-        document.getElementById("lu-num").textContent = level;
-        document.getElementById("lu-num").style.color = rank.color;
-        document.getElementById("lu-circle").style.borderColor = rank.color;
-        document.getElementById("lu-circle").style.background = rank.bg;
-        document.getElementById("lu-circle").style.boxShadow =
-          `0 0 24px ${rank.glow}`;
-        document.getElementById("lu-rank").textContent = rank.name;
-        document.getElementById("lu-rank").style.color = rank.color;
-        document.getElementById("lu-deco").style.color = rank.color;
-
-        // Check if a trial just became available
-        const trial = getAvailableTrial(P);
-        const tn = document.getElementById("lu-trial-notice");
-        if (trial) {
-          tn.innerHTML = `<div style="background:${trial.color}18;border:1px solid ${trial.color}44;border-radius:10px;padding:10px;margin-bottom:8px">
+  // Check if a trial just became available
+  const trial=getAvailableTrial(P);
+  const tn=document.getElementById('lu-trial-notice');
+  if(trial){
+    tn.innerHTML=`<div style="background:${trial.color}18;border:1px solid ${trial.color}44;border-radius:10px;padding:10px;margin-bottom:8px">
       <div style="font-size:9px;letter-spacing:2px;color:${trial.color};font-family:'Cinzel',serif;margin-bottom:4px">ÉPREUVE DISPONIBLE</div>
       <div style="font-size:13px;font-weight:700;color:#E8E4FF">${trial.icon} ${trial.title}</div>
       <div style="font-size:11px;color:rgba(232,228,255,.4);margin-top:2px">Complétez l'épreuve pour débloquer le rang ${trial.forRank}</div>
     </div>`;
-        } else tn.innerHTML = "";
+  } else tn.innerHTML='';
 
-        const newT = checkNewTitles(P);
-        if (newT.length) {
-          P.unlocked_titles = [...P.unlocked_titles, ...newT.map((t) => t.id)];
-          document.getElementById("lu-titles").innerHTML =
-            `<div style="background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.18);border-radius:9px;padding:10px;margin-bottom:8px">
+  const newT=checkNewTitles(P);
+  if(newT.length){
+    P.unlocked_titles=[...P.unlocked_titles,...newT.map(t=>t.id)];
+    document.getElementById('lu-titles').innerHTML=`<div style="background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.18);border-radius:9px;padding:10px;margin-bottom:8px">
       <div style="font-size:9px;letter-spacing:2px;color:rgba(255,215,0,.55);margin-bottom:5px">TITRES DÉBLOQUÉS</div>
-      ${newT.map((t) => `<div style="font-size:12px;font-style:italic;color:${t.color}">「${t.label}」</div>`).join("")}
+      ${newT.map(t=>`<div style="font-size:12px;font-style:italic;color:${t.color}">「${t.label}」</div>`).join('')}
     </div>`;
-          titleQueue.push(...newT.map((t) => t.id));
-        } else document.getElementById("lu-titles").innerHTML = "";
+    titleQueue.push(...newT.map(t=>t.id));
+  } else document.getElementById('lu-titles').innerHTML='';
 
-        openModal("lum");
-      }
-      async function closeLevelUp() {
-        closeModal("lum");
-        await persist();
-        renderAll();
-        if (titleQueue.length) setTimeout(showNextTitle, 350);
-      }
+  openModal('lum');
+}
+async function closeLevelUp(){
+  closeModal('lum');
+  await persist();
+  renderAll();
+  if(titleQueue.length) setTimeout(showNextTitle,350);
+}
 
-      // ════════════════════════════════════════════════════════
-      // RENDER ALL
-      // ════════════════════════════════════════════════════════
-      function renderAll() {
-        renderProfile();
-        renderQuests();
-        renderTitles();
-        renderRanks();
-      }
+// ════════════════════════════════════════════════════════
+// RENDER ALL
+// ════════════════════════════════════════════════════════
+function renderAll(){renderProfile();renderQuests();renderTitles();renderRanks();}
 
-      // ── PROFILE ──────────────────────────────────────────────────
-      function renderProfile() {
-        const rank = getRankForLevel(P.level);
-        const nextR = getNextRank(P.level);
-        const expReq = expRequired(P.level);
-        const pct = Math.min(100, Math.round((P.exp / expReq) * 100));
+// ── PROFILE ──────────────────────────────────────────────────
+function renderProfile(){
+  const rank=getRankForLevel(P.level);
+  const nextR=getNextRank(P.level);
+  const expReq=expRequired(P.level);
+  const pct=Math.min(100,Math.round((P.exp/expReq)*100));
 
-        const badge = document.getElementById("rank-badge");
-        badge.textContent = "RANG " + rank.name;
-        Object.assign(badge.style, {
-          borderColor: rank.color,
-          background: rank.bg,
-          color: rank.color,
-        });
-        document.getElementById("hero-card").style.borderColor =
-          rank.color + "44";
-        document.getElementById("hero-name").textContent =
-          P.username || "JOUEUR";
-        document.getElementById("hero-level").textContent = "Niveau " + P.level;
+  const badge=document.getElementById('rank-badge');
+  badge.textContent='RANG '+rank.name;
+  Object.assign(badge.style,{borderColor:rank.color,background:rank.bg,color:rank.color});
+  document.getElementById('hero-card').style.borderColor=rank.color+'44';
+  document.getElementById('hero-name').textContent=P.username||'JOUEUR';
+  document.getElementById('hero-level').textContent='Niveau '+P.level;
 
-        const sk = P.streak || 0;
-        const sEl = document.getElementById("streak-el");
-        sEl.textContent = `🔥 ${sk} jour${sk !== 1 ? "s" : ""}`;
-        sEl.style.color =
-          sk >= 7 ? "#E0623C" : sk >= 3 ? "#E8A730" : "rgba(232,228,255,.4)";
-        document.getElementById("streak-sub").textContent =
-          sk >= 30
-            ? "🏆 Incroyable !"
-            : sk >= 14
-              ? "🔥 En feu !"
-              : sk >= 7
-                ? "✨ Super !"
-                : sk >= 3
-                  ? "💪 Continue !"
-                  : "";
+  const sk=P.streak||0;
+  const sEl=document.getElementById('streak-el');
+  sEl.textContent=`🔥 ${sk} jour${sk!==1?'s':''}`;
+  sEl.style.color=sk>=7?'#E0623C':sk>=3?'#E8A730':'rgba(232,228,255,.4)';
+  document.getElementById('streak-sub').textContent=sk>=30?'🏆 Incroyable !':sk>=14?'🔥 En feu !':sk>=7?'✨ Super !':sk>=3?'💪 Continue !':'';
 
-        const activeT = TITLES.find(
-          (t) => t.id === P.active_title && P.unlocked_titles.includes(t.id),
-        );
-        const tel = document.getElementById("hero-title-el");
-        if (activeT) {
-          tel.textContent = "「" + activeT.label + "」";
-          tel.style.color = activeT.color;
-          tel.style.display = "block";
-        } else tel.style.display = "none";
+  const activeT=TITLES.find(t=>t.id===P.active_title&&P.unlocked_titles.includes(t.id));
+  const tel=document.getElementById('hero-title-el');
+  if(activeT){tel.textContent='「'+activeT.label+'」';tel.style.color=activeT.color;tel.style.display='block';}
+  else tel.style.display='none';
 
-        document.getElementById("ec").textContent = P.exp + " EXP";
-        document.getElementById("er").textContent = expReq + " EXP";
-        document.getElementById("expbar").style.width = pct + "%";
-        document.getElementById("nrt").innerHTML = nextR
-          ? `Prochain rang : <span style="color:${nextR.color};font-weight:700">${nextR.name}</span> — niv. ${nextR.minLvl}`
-          : '<span style="color:#FFD700">✦ Monarque des Ombres</span>';
+  document.getElementById('ec').textContent=P.exp+' EXP';
+  document.getElementById('er').textContent=expReq+' EXP';
+  document.getElementById('expbar').style.width=pct+'%';
+  document.getElementById('nrt').innerHTML=nextR
+    ?`Prochain rang : <span style="color:${nextR.color};font-weight:700">${nextR.name}</span> — niv. ${nextR.minLvl}`
+    :'<span style="color:#FFD700">✦ Monarque des Ombres</span>';
 
-        // Trial banner
-        const trial = getAvailableTrial(P);
-        const tb = document.getElementById("trial-banner");
-        if (trial) {
-          tb.style.display = "block";
-          tb.innerHTML = `<div class="trial-banner" onclick="openTrialModal()" style="background:linear-gradient(135deg,${trial.color}22,rgba(13,13,31,1));border:1px solid ${trial.color}55;border-radius:14px;padding:14px 16px">
+  // Trial banner
+  const trial=getAvailableTrial(P);
+  const tb=document.getElementById('trial-banner');
+  if(trial){
+    tb.style.display='block';
+    tb.innerHTML=`<div class="trial-banner" onclick="openTrialModal()" style="background:linear-gradient(135deg,${trial.color}22,rgba(13,13,31,1));border:1px solid ${trial.color}55;border-radius:14px;padding:14px 16px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div style="display:flex;align-items:center;gap:10px">
           <div style="font-size:2rem;flex-shrink:0">${trial.icon}</div>
@@ -2025,122 +605,94 @@
         </div>
       </div>
     </div>`;
-        } else tb.style.display = "none";
+  } else tb.style.display='none';
 
-        document.getElementById("pts-banner").style.display =
-          P.points > 0 ? "block" : "none";
-        document.getElementById("pts-val").textContent = P.points;
+  document.getElementById('pts-banner').style.display=P.points>0?'block':'none';
+  document.getElementById('pts-val').textContent=P.points;
 
-        drawSpider();
+  drawSpider();
 
-        document.getElementById("stats-grid").innerHTML = STATS_META.map(
-          (s) => {
-            const v = P.stats[s.key] || 0,
-              rl = statRankLabel(v),
-              rc = statRankColor(v);
-            return `<div class="card cp">
+  document.getElementById('stats-grid').innerHTML=STATS_META.map(s=>{
+    const v=P.stats[s.key]||0, rl=statRankLabel(v), rc=statRankColor(v);
+    return `<div class="card cp">
       <div style="font-size:1.2rem;margin-bottom:3px">${s.icon}</div>
       <div style="display:flex;align-items:baseline;gap:6px">
         <div style="font-size:1.5rem;font-weight:800;color:${s.color}">${v}</div>
         <div style="font-size:11px;font-weight:700;color:${rc};border:1px solid ${rc}44;border-radius:5px;padding:1px 5px">${rl}</div>
       </div>
       <div style="font-size:10px;color:rgba(232,228,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${s.label}</div>
-      <div class="sbg"><div class="sfill" style="width:${Math.min(100, v)}%;background:${s.color}"></div></div>
+      <div class="sbg"><div class="sfill" style="width:${Math.min(100,v)}%;background:${s.color}"></div></div>
     </div>`;
-          },
-        ).join("");
+  }).join('');
 
-        document.getElementById("g-level").textContent = P.level;
-        document.getElementById("g-quests").textContent =
-          P.total_quests_completed || 0;
-        document.getElementById("g-streak").textContent = P.streak || 0;
-        document.getElementById("g-stats").textContent = Object.values(
-          P.stats,
-        ).reduce((a, b) => a + b, 0);
-      }
+  document.getElementById('g-level').textContent=P.level;
+  document.getElementById('g-quests').textContent=P.total_quests_completed||0;
+  document.getElementById('g-streak').textContent=P.streak||0;
+  document.getElementById('g-stats').textContent=Object.values(P.stats).reduce((a,b)=>a+b,0);
+}
 
-      // ── SPIDER CHART (clean: filled polygon + axes only, no dots) ─
-      function drawSpider() {
-        const svg = document.getElementById("spider-chart");
-        const cx = 160,
-          cy = 160,
-          r = 105;
-        const keys = STATS_META.map((s) => s.key);
-        const n = keys.length;
-        const ang = keys.map((_, i) => (Math.PI * 2 * i) / n - Math.PI / 2);
-        let html = "";
+// ── SPIDER CHART (clean: filled polygon + axes only, no dots) ─
+function drawSpider(){
+  const svg=document.getElementById('spider-chart');
+  const cx=160,cy=160,r=105;
+  const keys=STATS_META.map(s=>s.key);
+  const n=keys.length;
+  const ang=keys.map((_,i)=>(Math.PI*2*i/n)-Math.PI/2);
+  let html='';
 
-        // Background rings (5 levels)
-        [0.2, 0.4, 0.6, 0.8, 1].forEach((f) => {
-          const pts = ang
-            .map(
-              (a) => `${cx + r * f * Math.cos(a)},${cy + r * f * Math.sin(a)}`,
-            )
-            .join(" ");
-          html += `<polygon points="${pts}" fill="none" stroke="rgba(139,130,232,0.12)" stroke-width="1"/>`;
-        });
+  // Background rings (5 levels)
+  [.2,.4,.6,.8,1].forEach(f=>{
+    const pts=ang.map(a=>`${cx+r*f*Math.cos(a)},${cy+r*f*Math.sin(a)}`).join(' ');
+    html+=`<polygon points="${pts}" fill="none" stroke="rgba(139,130,232,0.12)" stroke-width="1"/>`;
+  });
 
-        // Axes
-        ang.forEach((a) => {
-          html += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(a)}" y2="${cy + r * Math.sin(a)}" stroke="rgba(139,130,232,0.18)" stroke-width="1"/>`;
-        });
+  // Axes
+  ang.forEach(a=>{
+    html+=`<line x1="${cx}" y1="${cy}" x2="${cx+r*Math.cos(a)}" y2="${cy+r*Math.sin(a)}" stroke="rgba(139,130,232,0.18)" stroke-width="1"/>`;
+  });
 
-        // Data polygon — filled, no dots
-        const maxV = 150; // cap display at 150 for scale
-        const datapts = keys
-          .map((k, i) => {
-            const v = Math.min(maxV, P.stats[k] || 0);
-            return `${cx + r * (v / maxV) * Math.cos(ang[i])},${cy + r * (v / maxV) * Math.sin(ang[i])}`;
-          })
-          .join(" ");
-        html += `<polygon points="${datapts}" fill="rgba(139,130,232,0.22)" stroke="#8B82E8" stroke-width="2" stroke-linejoin="round"/>`;
+  // Data polygon — filled, no dots
+  const maxV=150; // cap display at 150 for scale
+  const datapts=keys.map((k,i)=>{
+    const v=Math.min(maxV,P.stats[k]||0);
+    return `${cx+(r*(v/maxV))*Math.cos(ang[i])},${cy+(r*(v/maxV))*Math.sin(ang[i])}`;
+  }).join(' ');
+  html+=`<polygon points="${datapts}" fill="rgba(139,130,232,0.22)" stroke="#8B82E8" stroke-width="2" stroke-linejoin="round"/>`;
 
-        // Labels + rank badge (outside the chart)
-        keys.forEach((k, i) => {
-          const sm = STATS_META.find((s) => s.key === k);
-          const v = P.stats[k] || 0;
-          const dist = r * 1.22;
-          const lx = cx + dist * Math.cos(ang[i]);
-          const ly = cy + dist * Math.sin(ang[i]);
-          const rl = statRankLabel(v);
-          const rc = statRankColor(v);
-          // Stat label
-          html += `<text x="${lx}" y="${ly - 3}" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="10" fill="rgba(232,228,255,0.55)" font-weight="700">${sm.label}</text>`;
-          // Rank badge text
-          html += `<text x="${lx}" y="${ly + 10}" text-anchor="middle" font-family="Cinzel,serif" font-size="9" fill="${rc}" font-weight="700">${rl}</text>`;
-        });
+  // Labels + rank badge (outside the chart)
+  keys.forEach((k,i)=>{
+    const sm=STATS_META.find(s=>s.key===k);
+    const v=P.stats[k]||0;
+    const dist=r*1.22;
+    const lx=cx+dist*Math.cos(ang[i]);
+    const ly=cy+dist*Math.sin(ang[i]);
+    const rl=statRankLabel(v);
+    const rc=statRankColor(v);
+    // Stat label
+    html+=`<text x="${lx}" y="${ly-3}" text-anchor="middle" font-family="Rajdhani,sans-serif" font-size="10" fill="rgba(232,228,255,0.55)" font-weight="700">${sm.label}</text>`;
+    // Rank badge text
+    html+=`<text x="${lx}" y="${ly+10}" text-anchor="middle" font-family="Cinzel,serif" font-size="9" fill="${rc}" font-weight="700">${rl}</text>`;
+  });
 
-        svg.innerHTML = html;
-      }
+  svg.innerHTML=html;
+}
 
-      // ── QUESTS ────────────────────────────────────────────────────
-      function renderQuests() {
-        const quests = buildQuests(P.stats);
-        const done = quests.filter((q) => completedQ.has(q.id)).length;
-        const expToday = quests
-          .filter((q) => completedQ.has(q.id))
-          .reduce((s, q) => s + q.expReward, 0);
-        document.getElementById("q-cnt").textContent =
-          done + "/" + quests.length;
-        document.getElementById("q-exp").textContent = "+" + expToday;
-        document.getElementById("q-date").textContent =
-          new Date().toLocaleDateString("fr-FR", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          });
-        document.getElementById("quests-list").innerHTML = quests
-          .map((q) => questHTML(q))
-          .join("");
-      }
+// ── QUESTS ────────────────────────────────────────────────────
+function renderQuests(){
+  const quests=buildQuests(P.stats);
+  const done=quests.filter(q=>completedQ.has(q.id)).length;
+  const expToday=quests.filter(q=>completedQ.has(q.id)).reduce((s,q)=>s+q.expReward,0);
+  document.getElementById('q-cnt').textContent=done+'/'+quests.length;
+  document.getElementById('q-exp').textContent='+'+expToday;
+  document.getElementById('q-date').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('quests-list').innerHTML=quests.map(q=>questHTML(q)).join('');
+}
 
-      function questHTML(q) {
-        const qd = completedQ.has(q.id);
-        const td = q.tasks.filter(
-          (t) => (taskProg[q.id + "_" + t.id] || {}).completed,
-        ).length;
-        const all = td === q.tasks.length;
-        return `<div class="qcard" id="qc-${q.id}" style="border-color:${qd ? q.color + "44" : "rgba(139,130,232,0.14)"}">
+function questHTML(q){
+  const qd=completedQ.has(q.id);
+  const td=q.tasks.filter(t=>(taskProg[q.id+'_'+t.id]||{}).completed).length;
+  const all=td===q.tasks.length;
+  return `<div class="qcard" id="qc-${q.id}" style="border-color:${qd?q.color+'44':'rgba(139,130,232,0.14)'}">
     <div style="background:linear-gradient(90deg,${q.color}14,transparent)">
       <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start">
         <div>
@@ -2153,834 +705,556 @@
           <div style="font-size:10px;color:rgba(232,228,255,.3);margin-top:1px">${td}/${q.tasks.length}</div>
         </div>
       </div>
-      <div class="qpbg"><div class="qpfill" id="qp-${q.id}" style="width:${(td / q.tasks.length) * 100}%;background:${q.color}"></div></div>
+      <div class="qpbg"><div class="qpfill" id="qp-${q.id}" style="width:${(td/q.tasks.length)*100}%;background:${q.color}"></div></div>
     </div>
     <div style="padding:9px;display:flex;flex-direction:column;gap:6px" id="qt-${q.id}">
-      ${q.tasks.map((t) => taskHTML(q, t, false)).join("")}
+      ${q.tasks.map(t=>taskHTML(q,t,false)).join('')}
     </div>
     <div style="padding:0 9px 9px">
-      ${
-        qd
-          ? `<div style="background:${q.color}10;border:1px solid ${q.color}30;border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:700;color:${q.color};letter-spacing:2px">✦ ACCOMPLIE ✦</div>`
-          : `<button class="cbtn" id="qb-${q.id}" onclick="completeQuest('${q.id}',${q.expReward})" ${all ? "" : "disabled"}>${all ? `Valider (+${q.expReward} EXP)` : `${td}/${q.tasks.length} tâches`}</button>`
-      }
+      ${qd
+        ?`<div style="background:${q.color}10;border:1px solid ${q.color}30;border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:700;color:${q.color};letter-spacing:2px">✦ ACCOMPLIE ✦</div>`
+        :`<button class="cbtn" id="qb-${q.id}" onclick="completeQuest('${q.id}',${q.expReward})" ${all?'':'disabled'}>${all?`Valider (+${q.expReward} EXP)`:`${td}/${q.tasks.length} tâches`}</button>`}
     </div>
   </div>`;
-      }
+}
 
-      function taskHTML(q, t, isUrg, isTrial) {
-        const key = isUrg ? t.id : isTrial ? "tr_" + t.id : q.id + "_" + t.id;
-        const prog = (isUrg ? urgentTProg : isTrial ? trialTProg : taskProg)[
-          key
-        ] || { value: 0, completed: false };
-        const done = prog.completed;
-        const req = getTaskRequired(t, P.stats);
-        const tk = (isUrg ? "u_" : isTrial ? "trial_" : "") + q.id + "_" + t.id;
+function taskHTML(q,t,isUrg,isTrial){
+  const key=isUrg?t.id:isTrial?('tr_'+t.id):(q.id+'_'+t.id);
+  const prog=(isUrg?urgentTProg:isTrial?trialTProg:taskProg)[key]||{value:0,completed:false};
+  const done=prog.completed;
+  const req=getTaskRequired(t,P.stats);
+  const tk=(isUrg?'u_':isTrial?'trial_':'')+q.id+'_'+t.id;
 
-        const onC = isUrg
-          ? `toggleUrgTask('${t.id}')`
-          : isTrial
-            ? `toggleTrialCheck('${t.id}')`
-            : `toggleTask('${q.id}','${t.id}')`;
-        const onR = isUrg
-          ? `setUrgReps('${t.id}',this.value,${req})`
-          : isTrial
-            ? `setTrialReps('${t.id}',this.value,${req})`
-            : `setReps('${q.id}','${t.id}',this.value,${req})`;
-        const onT = isUrg
-          ? `toggleUrgTimer('${t.id}',${req})`
-          : isTrial
-            ? `toggleTrialTimer('${t.id}',${req})`
-            : `toggleTimer('${q.id}','${t.id}',${req})`;
+  const onC=isUrg?`toggleUrgTask('${t.id}')`:(isTrial?`toggleTrialCheck('${t.id}')`:(`toggleTask('${q.id}','${t.id}')`));
+  const onR=isUrg?`setUrgReps('${t.id}',this.value,${req})`:(isTrial?`setTrialReps('${t.id}',this.value,${req})`:(`setReps('${q.id}','${t.id}',this.value,${req})`));
+  const onT=isUrg?`toggleUrgTimer('${t.id}',${req})`:(isTrial?`toggleTrialTimer('${t.id}',${req})`:(`toggleTimer('${q.id}','${t.id}',${req})`));
 
-        if (t.type === "check")
-          return `<div class="trow">
-    <div class="chk ${done ? "on" : ""}" onclick="${onC}">${done ? "✓" : ""}</div>
-    <div style="flex:1"><div style="font-size:13px;font-weight:600">${t.name}</div><div style="font-size:10px;color:rgba(232,228,255,.3)">${t.desc || ""}</div></div>
-    ${done ? `<span style="font-size:10px;color:${q.color};font-weight:700">✓</span>` : ""}
+  if(t.type==='check') return `<div class="trow">
+    <div class="chk ${done?'on':''}" onclick="${onC}">${done?'✓':''}</div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:600">${t.name}</div><div style="font-size:10px;color:rgba(232,228,255,.3)">${t.desc||''}</div></div>
+    ${done?`<span style="font-size:10px;color:${q.color};font-weight:700">✓</span>`:''}
   </div>`;
 
-        if (t.type === "timer") {
-          const ts = tmrs[tk] || { elapsed: 0, running: false };
-          const tdone = done || ts.elapsed >= req * 60;
-          const el = ts.elapsed || 0,
-            pct = Math.min(100, (el / (req * 60)) * 100);
-          return `<div class="trow">
-      <div class="tcircle" id="tc-${tk}" style="${tdone ? "border-color:#2EC4A0;color:#2EC4A0" : ts.running ? "border-color:#8B82E8;color:#8B82E8" : ""}">${tdone ? "✓" : formatTime(el)}</div>
+  if(t.type==='timer'){
+    const ts=tmrs[tk]||{elapsed:0,running:false};
+    const tdone=done||(ts.elapsed>=(req*60));
+    const el=ts.elapsed||0,pct=Math.min(100,(el/(req*60))*100);
+    return `<div class="trow">
+      <div class="tcircle" id="tc-${tk}" style="${tdone?'border-color:#2EC4A0;color:#2EC4A0':ts.running?'border-color:#8B82E8;color:#8B82E8':''}">${tdone?'✓':formatTime(el)}</div>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:600">${t.name}</div>
-        <div style="font-size:10px;color:rgba(232,228,255,.3)">${t.desc || ""}</div>
+        <div style="font-size:10px;color:rgba(232,228,255,.3)">${t.desc||''}</div>
         <div class="tbarbg"><div class="tbarfill" id="tb-${tk}" style="width:${pct}%;background:${q.color}"></div></div>
         <div style="font-size:10px;color:rgba(232,228,255,.2);margin-top:2px">${req} min requis</div>
       </div>
-      ${!tdone ? `<button class="tbtn" id="tbtn-${tk}" style="border-color:${q.color};color:${q.color}" onclick="${onT}">${ts.running ? "⏸" : "▶"}</button>` : ""}
+      ${!tdone?`<button class="tbtn" id="tbtn-${tk}" style="border-color:${q.color};color:${q.color}" onclick="${onT}">${ts.running?'⏸':'▶'}</button>`:''}
     </div>`;
-        }
+  }
 
-        return `<div class="trow">
-    <div class="chk ${done ? "on" : ""}">${done ? "✓" : ""}</div>
+  return `<div class="trow">
+    <div class="chk ${done?'on':''}">${done?'✓':''}</div>
     <div style="flex:1"><div style="font-size:13px;font-weight:600">${t.name}</div><div style="font-size:10px;color:rgba(232,228,255,.3)">Objectif : ${req} ${t.unit}</div></div>
-    <input class="rinp" type="number" min="0" max="9999" placeholder="0" value="${prog.value || ""}"
-      style="${done ? "border-color:" + q.color : ""}"
+    <input class="rinp" type="number" min="0" max="9999" placeholder="0" value="${prog.value||''}"
+      style="${done?'border-color:'+q.color:''}"
       onchange="${onR}" oninput="${onR}"/>
   </div>`;
-      }
+}
 
-      // ── Task actions ──────────────────────────────────────────────
-      async function toggleTask(qid, tid) {
-        const key = qid + "_" + tid;
-        const cur = (taskProg[key] || {}).completed;
-        const nv = !cur;
-        taskProg[key] = { value: 1, completed: nv };
-        await dbSaveTask(UID, qid, tid, TODAY, 1, nv);
-        refreshQuest(qid);
-        maybeUpdateStreak();
-      }
-      async function setReps(qid, tid, val, req) {
-        const num = parseInt(val) || 0,
-          done = num >= req;
-        taskProg[qid + "_" + tid] = { value: num, completed: done };
-        await dbSaveTask(UID, qid, tid, TODAY, num, done);
-        refreshQuest(qid);
-        if (done) maybeUpdateStreak();
-      }
-      function toggleTimer(qid, tid, reqMin) {
-        const key = qid + "_" + tid;
-        _toggleTimer(key, reqMin, async () => {
-          taskProg[key] = { value: reqMin, completed: true };
-          await dbSaveTask(UID, qid, tid, TODAY, reqMin, true);
-          refreshQuest(qid);
-          maybeUpdateStreak();
-          toast("Session terminée ✓");
-        });
-      }
+// ── Task actions ──────────────────────────────────────────────
+async function toggleTask(qid,tid){
+  const key=qid+'_'+tid;
+  const cur=(taskProg[key]||{}).completed;
+  const nv=!cur;
+  taskProg[key]={value:1,completed:nv};
+  await dbSaveTask(UID,qid,tid,TODAY,1,nv);
+  refreshQuest(qid);
+  maybeUpdateStreak();
+}
+async function setReps(qid,tid,val,req){
+  const num=parseInt(val)||0,done=num>=req;
+  taskProg[qid+'_'+tid]={value:num,completed:done};
+  await dbSaveTask(UID,qid,tid,TODAY,num,done);
+  refreshQuest(qid);
+  if(done) maybeUpdateStreak();
+}
+function toggleTimer(qid,tid,reqMin){
+  const key=qid+'_'+tid;
+  _toggleTimer(key,reqMin,async()=>{
+    taskProg[key]={value:reqMin,completed:true};
+    await dbSaveTask(UID,qid,tid,TODAY,reqMin,true);
+    refreshQuest(qid);
+    maybeUpdateStreak();
+    toast('Session terminée ✓');
+  });
+}
 
-      function _toggleTimer(key, reqMin, onDone) {
-        if (!tmrs[key])
-          tmrs[key] = { elapsed: 0, running: false, interval: null };
-        const ts = tmrs[key];
-        if (ts.running) {
-          clearInterval(ts.interval);
-          ts.interval = null;
-          ts.running = false;
-          _updateTimerUI(key, reqMin);
-        } else {
-          ts.running = true;
-          ts.interval = setInterval(() => {
-            ts.elapsed++;
-            _updateTimerUI(key, reqMin);
-            if (ts.elapsed >= reqMin * 60) {
-              clearInterval(ts.interval);
-              ts.interval = null;
-              ts.running = false;
-              onDone();
-            }
-          }, 1000);
-          _updateTimerUI(key, reqMin);
-        }
-      }
-      function _updateTimerUI(key, reqMin) {
-        const ts = tmrs[key] || { elapsed: 0 };
-        const el = ts.elapsed || 0,
-          pct = Math.min(100, (el / (reqMin * 60)) * 100),
-          done = el >= reqMin * 60;
-        const c = document.getElementById("tc-" + key);
-        const b = document.getElementById("tb-" + key);
-        const btn = document.getElementById("tbtn-" + key);
-        if (c) {
-          c.textContent = done ? "✓" : formatTime(el);
-          c.style.borderColor = done
-            ? "#2EC4A0"
-            : ts.running
-              ? "#8B82E8"
-              : "rgba(139,130,232,.3)";
-          c.style.color = done
-            ? "#2EC4A0"
-            : ts.running
-              ? "#8B82E8"
-              : "rgba(232,228,255,.45)";
-        }
-        if (b) b.style.width = pct + "%";
-        if (btn) btn.textContent = ts.running ? "⏸" : "▶";
-      }
+function _toggleTimer(key,reqMin,onDone){
+  if(!tmrs[key]) tmrs[key]={elapsed:0,running:false,interval:null};
+  const ts=tmrs[key];
+  if(ts.running){clearInterval(ts.interval);ts.interval=null;ts.running=false;_updateTimerUI(key,reqMin);}
+  else{
+    ts.running=true;
+    ts.interval=setInterval(()=>{
+      ts.elapsed++;
+      _updateTimerUI(key,reqMin);
+      if(ts.elapsed>=reqMin*60){clearInterval(ts.interval);ts.interval=null;ts.running=false;onDone();}
+    },1000);
+    _updateTimerUI(key,reqMin);
+  }
+}
+function _updateTimerUI(key,reqMin){
+  const ts=tmrs[key]||{elapsed:0};
+  const el=ts.elapsed||0,pct=Math.min(100,(el/(reqMin*60))*100),done=el>=reqMin*60;
+  const c=document.getElementById('tc-'+key);
+  const b=document.getElementById('tb-'+key);
+  const btn=document.getElementById('tbtn-'+key);
+  if(c){c.textContent=done?'✓':formatTime(el);c.style.borderColor=done?'#2EC4A0':ts.running?'#8B82E8':'rgba(139,130,232,.3)';c.style.color=done?'#2EC4A0':ts.running?'#8B82E8':'rgba(232,228,255,.45)';}
+  if(b) b.style.width=pct+'%';
+  if(btn) btn.textContent=ts.running?'⏸':'▶';
+}
 
-      function refreshQuest(qid) {
-        const quests = buildQuests(P.stats);
-        const q = quests.find((x) => x.id === qid);
-        if (!q) return;
-        const td = q.tasks.filter(
-          (t) => (taskProg[q.id + "_" + t.id] || {}).completed,
-        ).length;
-        const all = td === q.tasks.length,
-          qDone = completedQ.has(qid);
-        const tc = document.getElementById("qt-" + qid);
-        if (tc)
-          tc.innerHTML = q.tasks
-            .map((t) => taskHTML(q, t, false, false))
-            .join("");
-        const qp = document.getElementById("qp-" + qid);
-        if (qp) qp.style.width = (td / q.tasks.length) * 100 + "%";
-        const btn = document.getElementById("qb-" + qid);
-        if (btn && !qDone) {
-          btn.disabled = !all;
-          btn.textContent = all
-            ? `Valider (+${q.expReward} EXP)`
-            : `${td}/${q.tasks.length} tâches`;
-        }
-        const total = quests.filter((x) => completedQ.has(x.id)).length;
-        document.getElementById("q-cnt").textContent =
-          total + "/" + quests.length;
-        document.getElementById("q-exp").textContent =
-          "+" +
-          quests
-            .filter((x) => completedQ.has(x.id))
-            .reduce((s, x) => s + x.expReward, 0);
-      }
+function refreshQuest(qid){
+  const quests=buildQuests(P.stats);
+  const q=quests.find(x=>x.id===qid);if(!q)return;
+  const td=q.tasks.filter(t=>(taskProg[q.id+'_'+t.id]||{}).completed).length;
+  const all=td===q.tasks.length,qDone=completedQ.has(qid);
+  const tc=document.getElementById('qt-'+qid);
+  if(tc) tc.innerHTML=q.tasks.map(t=>taskHTML(q,t,false,false)).join('');
+  const qp=document.getElementById('qp-'+qid);if(qp)qp.style.width=(td/q.tasks.length*100)+'%';
+  const btn=document.getElementById('qb-'+qid);
+  if(btn&&!qDone){btn.disabled=!all;btn.textContent=all?`Valider (+${q.expReward} EXP)`:`${td}/${q.tasks.length} tâches`;}
+  const total=quests.filter(x=>completedQ.has(x.id)).length;
+  document.getElementById('q-cnt').textContent=total+'/'+quests.length;
+  document.getElementById('q-exp').textContent='+'+(quests.filter(x=>completedQ.has(x.id)).reduce((s,x)=>s+x.expReward,0));
+}
 
-      async function completeQuest(qid, expR) {
-        if (completedQ.has(qid)) return;
-        completedQ.add(qid);
-        await dbMarkQuestDone(UID, qid, TODAY);
-        P.total_quests_completed = (P.total_quests_completed || 0) + 1;
-        const newTs = checkNewTitles(P);
-        if (newTs.length) {
-          P.unlocked_titles = [...P.unlocked_titles, ...newTs.map((t) => t.id)];
-          titleQueue.push(...newTs.map((t) => t.id));
-        }
-        await gainExp(expR);
-        await persist();
-        toast("+" + expR + " EXP !");
-        refreshQuest(qid);
-        renderProfile();
-        renderTitles();
-        if (
-          !document.getElementById("lum").classList.contains("on") &&
-          titleQueue.length
-        )
-          setTimeout(showNextTitle, 350);
-      }
+async function completeQuest(qid,expR){
+  if(completedQ.has(qid))return;
+  completedQ.add(qid);
+  await dbMarkQuestDone(UID,qid,TODAY);
+  P.total_quests_completed=(P.total_quests_completed||0)+1;
+  const newTs=checkNewTitles(P);
+  if(newTs.length){P.unlocked_titles=[...P.unlocked_titles,...newTs.map(t=>t.id)];titleQueue.push(...newTs.map(t=>t.id));}
+  await gainExp(expR);
+  await persist();
+  toast('+'+expR+' EXP !');
+  refreshQuest(qid);
+  renderProfile();renderTitles();
+  if(!document.getElementById('lum').classList.contains('on')&&titleQueue.length) setTimeout(showNextTitle,350);
+}
 
-      // ════════════════════════════════════════════════════════
-      // RANK TRIALS
-      // ════════════════════════════════════════════════════════
-      function openTrialModal() {
-        const trial = getAvailableTrial(P);
-        if (!trial) return;
-        trialTProg = {};
-        document.getElementById("tm-subtitle").textContent =
-          trial.subtitle.toUpperCase();
-        document.getElementById("tm-subtitle").style.color = trial.color;
-        document.getElementById("tm-icon").textContent = trial.icon;
-        document.getElementById("tm-title").textContent = trial.title;
-        document.getElementById("tm-lore").textContent = trial.lore;
-        document.getElementById("tm-exp").textContent =
-          "+" + trial.expReward + " EXP";
-        document.getElementById("tm-exp").style.color = trial.color;
-        document.getElementById("trial-mbox").style.borderColor =
-          trial.color + "44";
-        renderTrialTasks(trial);
-        openModal("trialm");
-      }
+// ════════════════════════════════════════════════════════
+// RANK TRIALS
+// ════════════════════════════════════════════════════════
+function openTrialModal(){
+  const trial=getAvailableTrial(P);
+  if(!trial) return;
+  trialTProg={};
+  document.getElementById('tm-subtitle').textContent=trial.subtitle.toUpperCase();
+  document.getElementById('tm-subtitle').style.color=trial.color;
+  document.getElementById('tm-icon').textContent=trial.icon;
+  document.getElementById('tm-title').textContent=trial.title;
+  document.getElementById('tm-lore').textContent=trial.lore;
+  document.getElementById('tm-exp').textContent='+'+trial.expReward+' EXP';
+  document.getElementById('tm-exp').style.color=trial.color;
+  document.getElementById('trial-mbox').style.borderColor=trial.color+'44';
+  renderTrialTasks(trial);
+  openModal('trialm');
+}
 
-      function renderTrialTasks(trial) {
-        if (!trial) return;
-        const q = { id: "trial", color: trial.color };
-        const td = trial.tasks.filter(
-          (t) => (trialTProg["tr_" + t.id] || {}).completed,
-        ).length;
-        const all = td === trial.tasks.length;
-        document.getElementById("tm-tasks").innerHTML = trial.tasks
-          .map((t) => taskHTML(q, t, false, true))
-          .join("");
-        document.getElementById("tm-btn").innerHTML =
-          `<button class="cbtn" style="background:linear-gradient(135deg,${trial.color}BB,${trial.color})" onclick="completeTrial()" ${all ? "" : "disabled"}>
-    ${all ? `ÉPREUVE VALIDÉE (+${trial.expReward} EXP)` : `${td}/${trial.tasks.length} tâches accomplies`}
+function renderTrialTasks(trial){
+  if(!trial) return;
+  const q={id:'trial',color:trial.color};
+  const td=trial.tasks.filter(t=>(trialTProg['tr_'+t.id]||{}).completed).length;
+  const all=td===trial.tasks.length;
+  document.getElementById('tm-tasks').innerHTML=trial.tasks.map(t=>taskHTML(q,t,false,true)).join('');
+  document.getElementById('tm-btn').innerHTML=`<button class="cbtn" style="background:linear-gradient(135deg,${trial.color}BB,${trial.color})" onclick="completeTrial()" ${all?'':'disabled'}>
+    ${all?`ÉPREUVE VALIDÉE (+${trial.expReward} EXP)`:`${td}/${trial.tasks.length} tâches accomplies`}
   </button>`;
-      }
+}
 
-      function toggleTrialCheck(tid) {
-        const key = "tr_" + tid;
-        const cur = (trialTProg[key] || {}).completed;
-        trialTProg[key] = { value: 1, completed: !cur };
-        const trial = getAvailableTrial(P);
-        if (trial) renderTrialTasks(trial);
-      }
-      function setTrialReps(tid, val, req) {
-        const num = parseInt(val) || 0,
-          done = num >= req;
-        trialTProg["tr_" + tid] = { value: num, completed: done };
-        const trial = getAvailableTrial(P);
-        if (trial) renderTrialTasks(trial);
-      }
-      function toggleTrialTimer(tid, reqMin) {
-        const trial = getAvailableTrial(P);
-        if (!trial) return;
-        const key = "trial_trial_" + tid;
-        _toggleTimer(key, reqMin, () => {
-          trialTProg["tr_" + tid] = { value: reqMin, completed: true };
-          if (trial) renderTrialTasks(trial);
-          toast("Session terminée ✓");
-        });
-      }
+function toggleTrialCheck(tid){
+  const key='tr_'+tid;
+  const cur=(trialTProg[key]||{}).completed;
+  trialTProg[key]={value:1,completed:!cur};
+  const trial=getAvailableTrial(P);
+  if(trial) renderTrialTasks(trial);
+}
+function setTrialReps(tid,val,req){
+  const num=parseInt(val)||0,done=num>=req;
+  trialTProg['tr_'+tid]={value:num,completed:done};
+  const trial=getAvailableTrial(P);
+  if(trial) renderTrialTasks(trial);
+}
+function toggleTrialTimer(tid,reqMin){
+  const trial=getAvailableTrial(P);
+  if(!trial) return;
+  const key='trial_trial_'+tid;
+  _toggleTimer(key,reqMin,()=>{
+    trialTProg['tr_'+tid]={value:reqMin,completed:true};
+    if(trial) renderTrialTasks(trial);
+    toast('Session terminée ✓');
+  });
+}
 
-      async function completeTrial() {
-        const trial = getAvailableTrial(P);
-        if (!trial) return;
-        P.completed_trials = [...(P.completed_trials || []), trial.id];
-        const newTs = checkNewTitles(P);
-        if (newTs.length) {
-          P.unlocked_titles = [...P.unlocked_titles, ...newTs.map((t) => t.id)];
-          titleQueue.push(...newTs.map((t) => t.id));
-        }
-        await gainExp(trial.expReward);
-        await persist();
-        closeModal("trialm");
-        toast(
-          `⚔ ÉPREUVE RÉUSSIE ! Rang ${trial.forRank} débloqué ! +${trial.expReward} EXP`,
-        );
-        renderAll();
-        if (
-          !document.getElementById("lum").classList.contains("on") &&
-          titleQueue.length
-        )
-          setTimeout(showNextTitle, 350);
-      }
+async function completeTrial(){
+  const trial=getAvailableTrial(P);
+  if(!trial) return;
+  P.completed_trials=[...(P.completed_trials||[]),trial.id];
+  const newTs=checkNewTitles(P);
+  if(newTs.length){P.unlocked_titles=[...P.unlocked_titles,...newTs.map(t=>t.id)];titleQueue.push(...newTs.map(t=>t.id));}
+  await gainExp(trial.expReward);
+  await persist();
+  closeModal('trialm');
+  toast(`⚔ ÉPREUVE RÉUSSIE ! Rang ${trial.forRank} débloqué ! +${trial.expReward} EXP`);
+  renderAll();
+  if(!document.getElementById('lum').classList.contains('on')&&titleQueue.length) setTimeout(showNextTitle,350);
+}
 
-      // ── TITLES ────────────────────────────────────────────────────
-      function renderTitles() {
-        const have = new Set(P.unlocked_titles || []);
-        const activeT = TITLES.find(
-          (t) => t.id === P.active_title && have.has(t.id),
-        );
-        if (activeT) {
-          document.getElementById("active-title-lbl").textContent =
-            "「" + activeT.label + "」";
-          document.getElementById("active-title-lbl").style.color =
-            activeT.color;
-          document.getElementById("active-title-rar").textContent =
-            RARITY_LABELS[activeT.rarity];
-          document.getElementById("active-title-rar").style.color =
-            RARITY_COLORS[activeT.rarity];
-        } else {
-          document.getElementById("active-title-lbl").textContent = "— Aucun —";
-          document.getElementById("active-title-lbl").style.color =
-            "rgba(232,228,255,.2)";
-          document.getElementById("active-title-rar").textContent = "";
-        }
-        const uc = TITLES.filter((t) => have.has(t.id)).length;
-        document.getElementById("title-prog-txt").textContent =
-          uc + " / " + TITLES.length;
-        document.getElementById("title-prog-bar").style.width =
-          Math.round((uc / TITLES.length) * 100) + "%";
+// ── TITLES ────────────────────────────────────────────────────
+function renderTitles(){
+  const have=new Set(P.unlocked_titles||[]);
+  const activeT=TITLES.find(t=>t.id===P.active_title&&have.has(t.id));
+  if(activeT){
+    document.getElementById('active-title-lbl').textContent='「'+activeT.label+'」';
+    document.getElementById('active-title-lbl').style.color=activeT.color;
+    document.getElementById('active-title-rar').textContent=RARITY_LABELS[activeT.rarity];
+    document.getElementById('active-title-rar').style.color=RARITY_COLORS[activeT.rarity];
+  } else {
+    document.getElementById('active-title-lbl').textContent='— Aucun —';
+    document.getElementById('active-title-lbl').style.color='rgba(232,228,255,.2)';
+    document.getElementById('active-title-rar').textContent='';
+  }
+  const uc=TITLES.filter(t=>have.has(t.id)).length;
+  document.getElementById('title-prog-txt').textContent=uc+' / '+TITLES.length;
+  document.getElementById('title-prog-bar').style.width=Math.round(uc/TITLES.length*100)+'%';
 
-        let html = "";
-        for (const rar of RARITY_ORDER) {
-          const group = TITLES.filter((t) => t.rarity === rar);
-          if (!group.length) continue;
-          const rc = RARITY_COLORS[rar];
-          html += `<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:${rc};text-transform:uppercase;margin:16px 0 8px;display:flex;align-items:center;gap:7px">
+  let html='';
+  for(const rar of RARITY_ORDER){
+    const group=TITLES.filter(t=>t.rarity===rar);if(!group.length)continue;
+    const rc=RARITY_COLORS[rar];
+    html+=`<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:${rc};text-transform:uppercase;margin:16px 0 8px;display:flex;align-items:center;gap:7px">
       <div style="width:3px;height:11px;background:${rc};border-radius:2px;flex-shrink:0"></div>
       ${RARITY_LABELS[rar]}
-      <span style="color:rgba(232,228,255,.18)">(${group.filter((t) => have.has(t.id)).length}/${group.length})</span>
+      <span style="color:rgba(232,228,255,.18)">(${group.filter(t=>have.has(t.id)).length}/${group.length})</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:7px">`;
-          for (const t of group) {
-            const unlocked = have.has(t.id),
-              isAct = t.id === P.active_title;
-            html += `<div class="tcrd ${unlocked ? "" : "lk"} ${isAct ? "act" : ""}"
-        style="border-color:${unlocked ? t.color + "40" : "rgba(232,228,255,.07)"};background:${unlocked ? t.color + "08" : "rgba(255,255,255,.015)"};color:${t.color}"
-        onclick="${unlocked ? `activateTitle('${t.id}')` : ""}" >
-        <div style="font-size:13px;font-weight:700;font-style:italic;color:${unlocked ? t.color : "rgba(232,228,255,.16)"};">${unlocked ? "「" + t.label + "」" : "???"}</div>
+    for(const t of group){
+      const unlocked=have.has(t.id),isAct=t.id===P.active_title;
+      html+=`<div class="tcrd ${unlocked?'':'lk'} ${isAct?'act':''}"
+        style="border-color:${unlocked?t.color+'40':'rgba(232,228,255,.07)'};background:${unlocked?t.color+'08':'rgba(255,255,255,.015)'};color:${t.color}"
+        onclick="${unlocked?`activateTitle('${t.id}')`:''}" >
+        <div style="font-size:13px;font-weight:700;font-style:italic;color:${unlocked?t.color:'rgba(232,228,255,.16)'};">${unlocked?'「'+t.label+'」':'???'}</div>
         <div style="font-size:10px;color:rgba(232,228,255,.25);margin-top:3px">${t.desc}</div>
-        ${unlocked ? `<div style="font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:8px;border:1px solid ${rc}3A;background:${rc}0F;color:${rc};display:inline-block;margin-top:5px">${RARITY_LABELS[rar]}</div>` : ""}
+        ${unlocked?`<div style="font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:8px;border:1px solid ${rc}3A;background:${rc}0F;color:${rc};display:inline-block;margin-top:5px">${RARITY_LABELS[rar]}</div>`:''}
       </div>`;
-          }
-          html += "</div>";
-        }
-        document.getElementById("titles-list").innerHTML = html;
-      }
+    }
+    html+='</div>';
+  }
+  document.getElementById('titles-list').innerHTML=html;
+}
 
-      async function activateTitle(id) {
-        if (!P.unlocked_titles.includes(id)) return;
-        P.active_title = P.active_title === id ? null : id;
-        await persist();
-        renderProfile();
-        renderTitles();
-        const t = TITLES.find((x) => x.id === id);
-        if (P.active_title && t) toast("Titre : 「" + t.label + "」");
-      }
+async function activateTitle(id){
+  if(!P.unlocked_titles.includes(id))return;
+  P.active_title=P.active_title===id?null:id;
+  await persist();
+  renderProfile();renderTitles();
+  const t=TITLES.find(x=>x.id===id);
+  if(P.active_title&&t) toast('Titre : 「'+t.label+'」');
+}
 
-      function showNextTitle() {
-        if (!titleQueue.length) return;
-        const id = titleQueue.shift();
-        const t = TITLES.find((x) => x.id === id);
-        if (!t) {
-          showNextTitle();
-          return;
-        }
-        const rc = RARITY_COLORS[t.rarity];
-        const box = document.getElementById("ntm-box");
-        box.style.background = `linear-gradient(145deg,${t.color}18,#0D0D1F)`;
-        box.style.borderColor = t.color + "40";
-        document.getElementById("ntm-icon").textContent =
-          t.rarity === "mythic"
-            ? "👑"
-            : t.rarity === "legendary"
-              ? "🌟"
-              : t.rarity === "epic"
-                ? "💎"
-                : t.rarity === "rare"
-                  ? "🔷"
-                  : "🏅";
-        document.getElementById("ntm-label").textContent =
-          "「" + t.label + "」";
-        document.getElementById("ntm-label").style.color = t.color;
-        document.getElementById("ntm-badge").innerHTML =
-          `<span style="font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:10px;border:1px solid ${rc}3A;background:${rc}0F;color:${rc}">${RARITY_LABELS[t.rarity]}</span>`;
-        document.getElementById("ntm-desc").textContent = t.desc;
-        openModal("ntm");
-      }
-      function closeNewTitle() {
-        closeModal("ntm");
-        setTimeout(() => {
-          if (titleQueue.length) showNextTitle();
-        }, 300);
-      }
+function showNextTitle(){
+  if(!titleQueue.length)return;
+  const id=titleQueue.shift();
+  const t=TITLES.find(x=>x.id===id);if(!t){showNextTitle();return;}
+  const rc=RARITY_COLORS[t.rarity];
+  const box=document.getElementById('ntm-box');
+  box.style.background=`linear-gradient(145deg,${t.color}18,#0D0D1F)`;
+  box.style.borderColor=t.color+'40';
+  document.getElementById('ntm-icon').textContent=t.rarity==='mythic'?'👑':t.rarity==='legendary'?'🌟':t.rarity==='epic'?'💎':t.rarity==='rare'?'🔷':'🏅';
+  document.getElementById('ntm-label').textContent='「'+t.label+'」';
+  document.getElementById('ntm-label').style.color=t.color;
+  document.getElementById('ntm-badge').innerHTML=`<span style="font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 8px;border-radius:10px;border:1px solid ${rc}3A;background:${rc}0F;color:${rc}">${RARITY_LABELS[t.rarity]}</span>`;
+  document.getElementById('ntm-desc').textContent=t.desc;
+  openModal('ntm');
+}
+function closeNewTitle(){closeModal('ntm');setTimeout(()=>{if(titleQueue.length)showNextTitle();},300);}
 
-      // ── RANKS ─────────────────────────────────────────────────────
-      function renderRanks() {
-        const rank = getRankForLevel(P.level);
-        const nextR = getNextRank(P.level);
-        const rh = document.getElementById("rank-hero");
-        rh.style.background = `linear-gradient(145deg,${rank.color}15,#0D0D1F)`;
-        rh.style.borderColor = rank.color + "30";
-        document.getElementById("rh-name").textContent = rank.name;
-        document.getElementById("rh-name").style.color = rank.color;
-        document.getElementById("rh-name").style.textShadow =
-          `0 0 28px ${rank.glow}`;
-        document.getElementById("rh-level").textContent = "Niveau " + P.level;
-        document.getElementById("rh-next").innerHTML = nextR
-          ? `Prochain : <span style="color:${nextR.color};font-weight:700">${nextR.name}</span> — niv. ${nextR.minLvl} (${nextR.minLvl - P.level} niveaux)`
-          : '<span style="color:#FFD700">✦ Rang maximum atteint</span>';
+// ── RANKS ─────────────────────────────────────────────────────
+function renderRanks(){
+  const rank=getRankForLevel(P.level);
+  const nextR=getNextRank(P.level);
+  const rh=document.getElementById('rank-hero');
+  rh.style.background=`linear-gradient(145deg,${rank.color}15,#0D0D1F)`;
+  rh.style.borderColor=rank.color+'30';
+  document.getElementById('rh-name').textContent=rank.name;
+  document.getElementById('rh-name').style.color=rank.color;
+  document.getElementById('rh-name').style.textShadow=`0 0 28px ${rank.glow}`;
+  document.getElementById('rh-level').textContent='Niveau '+P.level;
+  document.getElementById('rh-next').innerHTML=nextR
+    ?`Prochain : <span style="color:${nextR.color};font-weight:700">${nextR.name}</span> — niv. ${nextR.minLvl} (${nextR.minLvl-P.level} niveaux)`
+    :'<span style="color:#FFD700">✦ Rang maximum atteint</span>';
 
-        document.getElementById("ranks-list").innerHTML = [...RANKS]
-          .reverse()
-          .map((r) => {
-            const isCur = r.name === rank.name,
-              reached = P.level >= r.minLvl;
-            const isNext = nextR && r.name === nextR.name;
-            const trial = RANK_TRIALS.find((t) => t.forRank === r.name);
-            const trialDone =
-              trial && (P.completed_trials || []).includes(trial.id);
-            const trialAvail =
-              trial && getAvailableTrial(P)?.forRank === r.name;
-            return `<div style="display:flex;align-items:center;gap:12px;background:#12122A;border:1px solid ${isCur ? r.color + "55" : "rgba(139,130,232,.1)"};border-radius:12px;padding:11px 14px;margin-bottom:7px;opacity:${reached ? 1 : 0.42}">
-      <div style="width:46px;height:46px;border-radius:50%;border:2px solid ${r.color}${reached ? "88" : "22"};background:${r.bg};display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:11px;font-weight:700;flex-shrink:0;color:${reached ? r.color : r.color + "28"}">${r.name}</div>
+  document.getElementById('ranks-list').innerHTML=[...RANKS].reverse().map(r=>{
+    const isCur=r.name===rank.name,reached=P.level>=r.minLvl;
+    const isNext=nextR&&r.name===nextR.name;
+    const trial=RANK_TRIALS.find(t=>t.forRank===r.name);
+    const trialDone=trial&&(P.completed_trials||[]).includes(trial.id);
+    const trialAvail=trial&&getAvailableTrial(P)?.forRank===r.name;
+    return `<div style="display:flex;align-items:center;gap:12px;background:#12122A;border:1px solid ${isCur?r.color+'55':'rgba(139,130,232,.1)'};border-radius:12px;padding:11px 14px;margin-bottom:7px;opacity:${reached?1:.42}">
+      <div style="width:46px;height:46px;border-radius:50%;border:2px solid ${r.color}${reached?'88':'22'};background:${r.bg};display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:11px;font-weight:700;flex-shrink:0;color:${reached?r.color:r.color+'28'}">${r.name}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:${reached ? "#E8E4FF" : "rgba(232,228,255,.3)"}">
+        <div style="font-size:13px;font-weight:600;color:${reached?'#E8E4FF':'rgba(232,228,255,.3)'}">
           ${r.name}
-          ${isCur ? ` <span style="font-size:10px;color:${r.color};letter-spacing:1px">◀ ACTUEL</span>` : ""}
-          ${isNext ? ` <span style="font-size:10px;color:${r.color}77"> ← prochain</span>` : ""}
+          ${isCur?` <span style="font-size:10px;color:${r.color};letter-spacing:1px">◀ ACTUEL</span>`:''}
+          ${isNext?` <span style="font-size:10px;color:${r.color}77"> ← prochain</span>`:''}
         </div>
-        <div style="font-size:10px;color:rgba(232,228,255,.25)">${reached ? (isCur ? "Niveau " + P.level : "✓ Débloqué") : "Requis : niveau " + r.minLvl}</div>
-        ${
-          trial
-            ? `<div style="font-size:10px;margin-top:3px;color:${trialDone ? "#2EC4A0" : trialAvail ? r.color : "rgba(232,228,255,.2)"}">
-          ${trialDone ? "✓ Épreuve réussie" : trialAvail ? `⚔ Épreuve disponible` : "🔒 Épreuve requise"}
-        </div>`
-            : ""
-        }
+        <div style="font-size:10px;color:rgba(232,228,255,.25)">${reached?(isCur?'Niveau '+P.level:'✓ Débloqué'):'Requis : niveau '+r.minLvl}</div>
+        ${trial?`<div style="font-size:10px;margin-top:3px;color:${trialDone?'#2EC4A0':trialAvail?r.color:'rgba(232,228,255,.2)'}">
+          ${trialDone?'✓ Épreuve réussie':trialAvail?`⚔ Épreuve disponible`:'🔒 Épreuve requise'}
+        </div>`:''}
       </div>
-      <div style="font-size:1.2rem;font-weight:800;color:${r.color};opacity:${reached ? 1 : 0.18}">${r.minLvl}</div>
+      <div style="font-size:1.2rem;font-weight:800;color:${r.color};opacity:${reached?1:.18}">${r.minLvl}</div>
     </div>`;
-          })
-          .join("");
-      }
+  }).join('');
+}
 
-      // ── ALLOC ─────────────────────────────────────────────────────
-      function renderAllocRows() {
-        const tot = Object.values(allocPend).reduce((a, b) => a + b, 0),
-          left = P.points - tot;
-        document.getElementById("alloc-left").textContent =
-          left + " point(s) à distribuer";
-        document.getElementById("alloc-rows").innerHTML = STATS_META.map(
-          (s) => {
-            const add = allocPend[s.key] || 0,
-              nv = P.stats[s.key] + add;
-            return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+// ── ALLOC ─────────────────────────────────────────────────────
+function renderAllocRows(){
+  const tot=Object.values(allocPend).reduce((a,b)=>a+b,0),left=P.points-tot;
+  document.getElementById('alloc-left').textContent=left+' point(s) à distribuer';
+  document.getElementById('alloc-rows').innerHTML=STATS_META.map(s=>{
+    const add=allocPend[s.key]||0,nv=P.stats[s.key]+add;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <span style="font-size:1.1rem">${s.icon}</span>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:600;color:${s.color}">${s.label}</div>
         <div style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:3px;overflow:hidden">
-          <div style="height:3px;width:${Math.min(100, nv)}%;background:${s.color};transition:width .3s;border-radius:2px"></div>
+          <div style="height:3px;width:${Math.min(100,nv)}%;background:${s.color};transition:width .3s;border-radius:2px"></div>
         </div>
       </div>
       <div style="font-size:1.1rem;font-weight:800;color:${s.color};min-width:32px;text-align:center">${nv}</div>
       <div style="display:flex;gap:5px">
-        <button class="actrl" onclick="allocDec('${s.key}')" ${add ? "" : "disabled"}>−</button>
-        <button class="actrl" onclick="allocInc('${s.key}')" ${left > 0 ? "" : "disabled"} style="border-color:${s.color}77;color:${s.color}">+</button>
+        <button class="actrl" onclick="allocDec('${s.key}')" ${add?'':'disabled'}>−</button>
+        <button class="actrl" onclick="allocInc('${s.key}')" ${left>0?'':'disabled'} style="border-color:${s.color}77;color:${s.color}">+</button>
       </div>
     </div>`;
-          },
-        ).join("");
-      }
-      function allocInc(k) {
-        const tot = Object.values(allocPend).reduce((a, b) => a + b, 0);
-        if (P.points - tot <= 0) return;
-        allocPend[k] = (allocPend[k] || 0) + 1;
-        renderAllocRows();
-      }
-      function allocDec(k) {
-        if (!allocPend[k]) return;
-        allocPend[k] = Math.max(0, allocPend[k] - 1);
-        renderAllocRows();
-      }
-      async function confirmAlloc() {
-        const tot = Object.values(allocPend).reduce((a, b) => a + b, 0);
-        if (!tot) {
-          closeModal("am");
-          return;
-        }
-        Object.entries(allocPend).forEach(([k, v]) => {
-          P.stats[k] += v;
-        });
-        P.points -= tot;
-        const newTs = checkNewTitles(P);
-        if (newTs.length) {
-          P.unlocked_titles = [...P.unlocked_titles, ...newTs.map((t) => t.id)];
-          titleQueue.push(...newTs.map((t) => t.id));
-        }
-        await persist();
-        closeModal("am");
-        renderAll();
-        toast(
-          tot +
-            " pt" +
-            (tot > 1 ? "s" : "") +
-            " alloué" +
-            (tot > 1 ? "s" : "") +
-            "!",
-        );
-        if (titleQueue.length) setTimeout(showNextTitle, 350);
-      }
+  }).join('');
+}
+function allocInc(k){const tot=Object.values(allocPend).reduce((a,b)=>a+b,0);if(P.points-tot<=0)return;allocPend[k]=(allocPend[k]||0)+1;renderAllocRows();}
+function allocDec(k){if(!allocPend[k])return;allocPend[k]=Math.max(0,allocPend[k]-1);renderAllocRows();}
+async function confirmAlloc(){
+  const tot=Object.values(allocPend).reduce((a,b)=>a+b,0);
+  if(!tot){closeModal('am');return;}
+  Object.entries(allocPend).forEach(([k,v])=>{P.stats[k]+=v;});
+  P.points-=tot;
+  const newTs=checkNewTitles(P);
+  if(newTs.length){P.unlocked_titles=[...P.unlocked_titles,...newTs.map(t=>t.id)];titleQueue.push(...newTs.map(t=>t.id));}
+  await persist();
+  closeModal('am');
+  renderAll();
+  toast(tot+' pt'+(tot>1?'s':'')+' alloué'+(tot>1?'s':'')+'!');
+  if(titleQueue.length) setTimeout(showNextTitle,350);
+}
 
-      // ── URGENT QUESTS ─────────────────────────────────────────────
-      function scheduleUrgent() {
-        if (urgentActive) return;
-        setTimeout(triggerUrgent, (5 + Math.random() * 25) * 60 * 1000);
-      }
-      async function triggerUrgent() {
-        if (urgentActive) return;
-        const { data } = await dbLoadTodayUrgent(UID, TODAY);
-        if (data) return;
-        const qd = pickRandomUrgentQuest();
-        const inst = {
-          instanceId: Date.now().toString(),
-          questId: qd.id,
-          startedAt: Date.now(),
-          timeLimitMs: qd.timeLimitMin * 60 * 1000,
-        };
-        urgentTProg = {};
-        urgentActive = { questDef: qd, instance: inst };
-        await dbCreateUrgent(UID, inst, TODAY);
-        startUrgentCD();
-        openModal("um");
-        renderUrgentModal();
-      }
-      function startUrgentCD() {
-        if (!urgentActive) return;
-        document.getElementById("ustrip").classList.add("on");
-        document.getElementById("ustrip-icon").textContent =
-          urgentActive.questDef.icon;
-        document.getElementById("ustrip-title").textContent =
-          urgentActive.questDef.title;
-        if (urgentCDInterval) clearInterval(urgentCDInterval);
-        urgentCDInterval = setInterval(updateUrgentCD, 1000);
-        updateUrgentCD();
-      }
-      function updateUrgentCD() {
-        if (!urgentActive) return;
-        const rem = Math.max(
-          0,
-          urgentActive.instance.timeLimitMs -
-            (Date.now() - urgentActive.instance.startedAt),
-        );
-        const disp = formatTime(Math.floor(rem / 1000));
-        document.getElementById("ustrip-timer").textContent = disp;
-        const cdEl = document.getElementById("um-countdown");
-        if (cdEl) cdEl.textContent = disp;
-        if (rem <= 0) {
-          clearInterval(urgentCDInterval);
-          handleUrgentFail();
-        }
-      }
-      async function handleUrgentFail() {
-        if (!urgentActive) return;
-        await dbFailUrgent(UID, TODAY);
-        urgentActive = null;
-        urgentTProg = {};
-        document.getElementById("ustrip").classList.remove("on");
-        closeModal("um");
-        toast("⚠ Quête urgente échouée");
-      }
-      function renderUrgentModal() {
-        if (!urgentActive) return;
-        const q = urgentActive.questDef;
-        document.getElementById("um-icon").textContent = q.icon;
-        document.getElementById("um-title").textContent = q.title;
-        document.getElementById("um-desc").textContent = q.desc;
-        const td = q.tasks.filter(
-          (t) => (urgentTProg[t.id] || {}).completed,
-        ).length;
-        const all = td === q.tasks.length;
-        document.getElementById("um-tasks").innerHTML = q.tasks
-          .map((t) => taskHTML(q, t, true, false))
-          .join("");
-        document.getElementById("um-btn").innerHTML =
-          `<button class="cbtn" style="background:linear-gradient(135deg,#8A2A0A,${q.color})" onclick="completeUrgent()" ${all ? "" : "disabled"}>
-    ${all ? `MISSION ACCOMPLIE (+${q.expReward} EXP)` : `${td}/${q.tasks.length} tâches`}
+// ── URGENT QUESTS ─────────────────────────────────────────────
+function scheduleUrgent(){
+  if(urgentActive)return;
+  setTimeout(triggerUrgent,(5+Math.random()*25)*60*1000);
+}
+async function triggerUrgent(){
+  if(urgentActive)return;
+  const{data}=await dbLoadTodayUrgent(UID,TODAY);
+  if(data)return;
+  const qd=pickRandomUrgentQuest();
+  const inst={instanceId:Date.now().toString(),questId:qd.id,startedAt:Date.now(),timeLimitMs:qd.timeLimitMin*60*1000};
+  urgentTProg={};
+  urgentActive={questDef:qd,instance:inst};
+  await dbCreateUrgent(UID,inst,TODAY);
+  startUrgentCD();
+  openModal('um');renderUrgentModal();
+}
+function startUrgentCD(){
+  if(!urgentActive)return;
+  document.getElementById('ustrip').classList.add('on');
+  document.getElementById('ustrip-icon').textContent=urgentActive.questDef.icon;
+  document.getElementById('ustrip-title').textContent=urgentActive.questDef.title;
+  if(urgentCDInterval)clearInterval(urgentCDInterval);
+  urgentCDInterval=setInterval(updateUrgentCD,1000);
+  updateUrgentCD();
+}
+function updateUrgentCD(){
+  if(!urgentActive)return;
+  const rem=Math.max(0,urgentActive.instance.timeLimitMs-(Date.now()-urgentActive.instance.startedAt));
+  const disp=formatTime(Math.floor(rem/1000));
+  document.getElementById('ustrip-timer').textContent=disp;
+  const cdEl=document.getElementById('um-countdown');if(cdEl)cdEl.textContent=disp;
+  if(rem<=0){clearInterval(urgentCDInterval);handleUrgentFail();}
+}
+async function handleUrgentFail(){
+  if(!urgentActive)return;
+  await dbFailUrgent(UID,TODAY);
+  urgentActive=null;urgentTProg={};
+  document.getElementById('ustrip').classList.remove('on');
+  closeModal('um');
+  toast('⚠ Quête urgente échouée');
+}
+function renderUrgentModal(){
+  if(!urgentActive)return;
+  const q=urgentActive.questDef;
+  document.getElementById('um-icon').textContent=q.icon;
+  document.getElementById('um-title').textContent=q.title;
+  document.getElementById('um-desc').textContent=q.desc;
+  const td=q.tasks.filter(t=>(urgentTProg[t.id]||{}).completed).length;
+  const all=td===q.tasks.length;
+  document.getElementById('um-tasks').innerHTML=q.tasks.map(t=>taskHTML(q,t,true,false)).join('');
+  document.getElementById('um-btn').innerHTML=`<button class="cbtn" style="background:linear-gradient(135deg,#8A2A0A,${q.color})" onclick="completeUrgent()" ${all?'':'disabled'}>
+    ${all?`MISSION ACCOMPLIE (+${q.expReward} EXP)`:`${td}/${q.tasks.length} tâches`}
   </button>`;
-      }
-      function refreshUrgent() {
-        if (!urgentActive) return;
-        const q = urgentActive.questDef;
-        const td = q.tasks.filter(
-          (t) => (urgentTProg[t.id] || {}).completed,
-        ).length;
-        document.getElementById("um-tasks").innerHTML = q.tasks
-          .map((t) => taskHTML(q, t, true, false))
-          .join("");
-        document.getElementById("um-btn").innerHTML =
-          `<button class="cbtn" style="background:linear-gradient(135deg,#8A2A0A,${q.color})" onclick="completeUrgent()" ${td === q.tasks.length ? "" : "disabled"}>
-    ${td === q.tasks.length ? `MISSION ACCOMPLIE (+${q.expReward} EXP)` : `${td}/${q.tasks.length} tâches`}
+}
+function refreshUrgent(){
+  if(!urgentActive)return;
+  const q=urgentActive.questDef;
+  const td=q.tasks.filter(t=>(urgentTProg[t.id]||{}).completed).length;
+  document.getElementById('um-tasks').innerHTML=q.tasks.map(t=>taskHTML(q,t,true,false)).join('');
+  document.getElementById('um-btn').innerHTML=`<button class="cbtn" style="background:linear-gradient(135deg,#8A2A0A,${q.color})" onclick="completeUrgent()" ${td===q.tasks.length?'':'disabled'}>
+    ${td===q.tasks.length?`MISSION ACCOMPLIE (+${q.expReward} EXP)`:`${td}/${q.tasks.length} tâches`}
   </button>`;
-      }
-      async function toggleUrgTask(tid) {
-        const cur = (urgentTProg[tid] || {}).completed;
-        urgentTProg[tid] = { value: 1, completed: !cur };
-        await dbSaveTask(
-          UID,
-          "urgent",
-          tid,
-          "urg_" + urgentActive.instance.instanceId,
-          1,
-          !cur,
-        );
-        refreshUrgent();
-      }
-      async function setUrgReps(tid, val, req) {
-        const num = parseInt(val) || 0,
-          done = num >= req;
-        urgentTProg[tid] = { value: num, completed: done };
-        await dbSaveTask(
-          UID,
-          "urgent",
-          tid,
-          "urg_" + urgentActive.instance.instanceId,
-          num,
-          done,
-        );
-        refreshUrgent();
-      }
-      function toggleUrgTimer(tid, reqMin) {
-        const key = "u_urgent_" + tid;
-        _toggleTimer(key, reqMin, async () => {
-          urgentTProg[tid] = { value: reqMin, completed: true };
-          await dbSaveTask(
-            UID,
-            "urgent",
-            tid,
-            "urg_" + urgentActive.instance.instanceId,
-            reqMin,
-            true,
-          );
-          refreshUrgent();
-          toast("Session terminée ✓");
-        });
-      }
-      async function completeUrgent() {
-        if (!urgentActive) return;
-        clearInterval(urgentCDInterval);
-        const q = urgentActive.questDef;
-        await dbCompleteUrgent(UID, TODAY);
-        P.urgent_quests_completed = (P.urgent_quests_completed || 0) + 1;
-        P.total_quests_completed = (P.total_quests_completed || 0) + 1;
-        const newTs = checkNewTitles(P);
-        if (newTs.length) {
-          P.unlocked_titles = [...P.unlocked_titles, ...newTs.map((t) => t.id)];
-          titleQueue.push(...newTs.map((t) => t.id));
-        }
-        await gainExp(q.expReward);
-        await persist();
-        urgentActive = null;
-        urgentTProg = {};
-        document.getElementById("ustrip").classList.remove("on");
-        closeModal("um");
-        toast(`⚡ QUÊTE URGENTE ! +${q.expReward} EXP`);
-        renderAll();
-        if (
-          !document.getElementById("lum").classList.contains("on") &&
-          titleQueue.length
-        )
-          setTimeout(showNextTitle, 350);
-      }
+}
+async function toggleUrgTask(tid){
+  const cur=(urgentTProg[tid]||{}).completed;
+  urgentTProg[tid]={value:1,completed:!cur};
+  await dbSaveTask(UID,'urgent',tid,'urg_'+urgentActive.instance.instanceId,1,!cur);
+  refreshUrgent();
+}
+async function setUrgReps(tid,val,req){
+  const num=parseInt(val)||0,done=num>=req;
+  urgentTProg[tid]={value:num,completed:done};
+  await dbSaveTask(UID,'urgent',tid,'urg_'+urgentActive.instance.instanceId,num,done);
+  refreshUrgent();
+}
+function toggleUrgTimer(tid,reqMin){
+  const key='u_urgent_'+tid;
+  _toggleTimer(key,reqMin,async()=>{
+    urgentTProg[tid]={value:reqMin,completed:true};
+    await dbSaveTask(UID,'urgent',tid,'urg_'+urgentActive.instance.instanceId,reqMin,true);
+    refreshUrgent();toast('Session terminée ✓');
+  });
+}
+async function completeUrgent(){
+  if(!urgentActive)return;
+  clearInterval(urgentCDInterval);
+  const q=urgentActive.questDef;
+  await dbCompleteUrgent(UID,TODAY);
+  P.urgent_quests_completed=(P.urgent_quests_completed||0)+1;
+  P.total_quests_completed=(P.total_quests_completed||0)+1;
+  const newTs=checkNewTitles(P);
+  if(newTs.length){P.unlocked_titles=[...P.unlocked_titles,...newTs.map(t=>t.id)];titleQueue.push(...newTs.map(t=>t.id));}
+  await gainExp(q.expReward);
+  await persist();
+  urgentActive=null;urgentTProg={};
+  document.getElementById('ustrip').classList.remove('on');
+  closeModal('um');
+  toast(`⚡ QUÊTE URGENTE ! +${q.expReward} EXP`);
+  renderAll();
+  if(!document.getElementById('lum').classList.contains('on')&&titleQueue.length) setTimeout(showNextTitle,350);
+}
 
-      // ── FRIENDS ───────────────────────────────────────────────────
-      let _sdt = null;
-      async function searchPlayers() {
-        clearTimeout(_sdt);
-        const q = document.getElementById("friend-search").value.trim();
-        if (q.length < 2) {
-          document.getElementById("search-results").innerHTML = "";
-          return;
-        }
-        _sdt = setTimeout(async () => {
-          const { data } = await dbSearchPlayers(q);
-          if (!data || !data.length) {
-            document.getElementById("search-results").innerHTML =
-              '<div style="font-size:12px;color:rgba(232,228,255,.28);padding:8px">Aucun résultat</div>';
-            return;
-          }
-          document.getElementById("search-results").innerHTML = data
-            .filter((p) => p.id !== UID)
-            .map((p) => {
-              const rank = getRankForLevel(p.level);
-              return `<div class="friend-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${p.username}</div><div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level}</div></div>
+// ── FRIENDS ───────────────────────────────────────────────────
+let _sdt=null;
+async function searchPlayers(){
+  clearTimeout(_sdt);
+  const q=document.getElementById('friend-search').value.trim();
+  if(q.length<2){document.getElementById('search-results').innerHTML='';return;}
+  _sdt=setTimeout(async()=>{
+    const{data}=await dbSearchPlayers(q);
+    if(!data||!data.length){document.getElementById('search-results').innerHTML='<div style="font-size:12px;color:rgba(232,228,255,.28);padding:8px">Aucun résultat</div>';return;}
+    document.getElementById('search-results').innerHTML=data.filter(p=>p.id!==UID).map(p=>{
+      const rank=getRankForLevel(p.level);
+      return `<div class="friend-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${p.username}</div><div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level}</div></div>
         <button onclick="sendFriend('${p.id}')" style="background:linear-gradient(135deg,#5A50C8,#8B82E8);border:none;border-radius:8px;padding:6px 12px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;cursor:pointer">+ Ami</button>
       </div>`;
-            })
-            .join("");
-        }, 400);
-      }
-      async function sendFriend(id) {
-        const { error } = await dbSendFriendRequest(UID, id);
-        if (error) toast("Demande déjà envoyée");
-        else {
-          toast("Demande envoyée !");
-          loadFriends();
-        }
-      }
+    }).join('');
+  },400);
+}
+async function sendFriend(id){const{error}=await dbSendFriendRequest(UID,id);if(error)toast('Demande déjà envoyée');else{toast('Demande envoyée !');loadFriends();}}
 
-      async function loadFriends() {
-        const { data } = await dbGetFriends(UID);
-        if (!data) return;
-        let html = "";
-        const pending = data.filter(
-          (f) => f.status === "pending" && f.addressee_id === UID,
-        );
-        const accepted = data.filter((f) => f.status === "accepted");
-        const sent = data.filter(
-          (f) => f.status === "pending" && f.requester_id === UID,
-        );
-        if (pending.length) {
-          html += `<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#E8A730;text-transform:uppercase;margin:10px 0 7px">Demandes reçues</div>`;
-          pending.forEach((f) => {
-            const p = f.requester,
-              rank = getRankForLevel(p.level);
-            html += `<div class="friend-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${p.username}</div><div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level}</div></div>
+async function loadFriends(){
+  const{data}=await dbGetFriends(UID);if(!data)return;
+  let html='';
+  const pending=data.filter(f=>f.status==='pending'&&f.addressee_id===UID);
+  const accepted=data.filter(f=>f.status==='accepted');
+  const sent=data.filter(f=>f.status==='pending'&&f.requester_id===UID);
+  if(pending.length){
+    html+=`<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#E8A730;text-transform:uppercase;margin:10px 0 7px">Demandes reçues</div>`;
+    pending.forEach(f=>{const p=f.requester,rank=getRankForLevel(p.level);
+      html+=`<div class="friend-row"><div style="flex:1"><div style="font-size:13px;font-weight:600">${p.username}</div><div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level}</div></div>
         <div style="display:flex;gap:6px">
           <button onclick="acceptFriend('${f.id}')" style="background:linear-gradient(135deg,#1D7A50,#2EC4A0);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;cursor:pointer">✓</button>
           <button onclick="removeFriend('${f.id}')" style="background:rgba(224,98,60,.12);border:1px solid rgba(224,98,60,.28);border-radius:8px;padding:6px 10px;color:#E0623C;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;cursor:pointer">✗</button>
         </div>
       </div>`;
-          });
-        }
-        if (accepted.length) {
-          html += `<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#2EC4A0;text-transform:uppercase;margin:10px 0 7px">Amis (${accepted.length})</div>`;
-          accepted.forEach((f) => {
-            const p = f.requester_id === UID ? f.addressee : f.requester;
-            const rank = getRankForLevel(p.level);
-            const activeT = p.active_title
-              ? TITLES.find(
-                  (t) =>
-                    t.id === p.active_title &&
-                    (p.unlocked_titles || []).includes(t.id),
-                )
-              : null;
-            html += `<div class="friend-row">
+    });
+  }
+  if(accepted.length){
+    html+=`<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#2EC4A0;text-transform:uppercase;margin:10px 0 7px">Amis (${accepted.length})</div>`;
+    accepted.forEach(f=>{
+      const p=f.requester_id===UID?f.addressee:f.requester;
+      const rank=getRankForLevel(p.level);
+      const activeT=p.active_title?TITLES.find(t=>t.id===p.active_title&&(p.unlocked_titles||[]).includes(t.id)):null;
+      html+=`<div class="friend-row">
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:600">${p.username}${activeT ? ` <span style="font-size:11px;font-style:italic;color:${activeT.color}">「${activeT.label}」</span>` : ""}</div>
-          <div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level} • 🔥 ${p.streak || 0}</div>
+          <div style="font-size:13px;font-weight:600">${p.username}${activeT?` <span style="font-size:11px;font-style:italic;color:${activeT.color}">「${activeT.label}」</span>`:''}</div>
+          <div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level} • 🔥 ${p.streak||0}</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">
-            ${STATS_META.map((s) => `<span style="font-size:9px;font-weight:700;color:${s.color};opacity:.7">${s.icon}${p.stats?.[s.key] || 0}</span>`).join("")}
+            ${STATS_META.map(s=>`<span style="font-size:9px;font-weight:700;color:${s.color};opacity:.7">${s.icon}${p.stats?.[s.key]||0}</span>`).join('')}
           </div>
         </div>
         <button onclick="removeFriend('${f.id}')" style="background:transparent;border:1px solid rgba(224,98,60,.22);border-radius:8px;padding:5px 9px;color:rgba(224,98,60,.55);font-family:'Rajdhani',sans-serif;font-size:11px;cursor:pointer">Retirer</button>
       </div>`;
-          });
-        }
-        if (sent.length) {
-          html += `<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(232,228,255,.25);text-transform:uppercase;margin:10px 0 7px">Demandes envoyées</div>`;
-          sent.forEach((f) => {
-            const p = f.addressee,
-              rank = getRankForLevel(p.level);
-            html += `<div class="friend-row" style="opacity:.55"><div style="flex:1"><div style="font-size:13px;font-weight:600">${p.username}</div><div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level}</div></div><span style="font-size:11px;color:rgba(232,228,255,.28)">En attente...</span></div>`;
-          });
-        }
-        if (!html)
-          html =
-            '<div style="font-size:13px;color:rgba(232,228,255,.22);text-align:center;padding:24px 0">Aucun ami pour l\'instant.<br>Recherchez des joueurs ci-dessus.</div>';
-        document.getElementById("friends-list").innerHTML = html;
-      }
-      async function acceptFriend(id) {
-        await dbAcceptFriend(UID, id);
-        loadFriends();
-        toast("Ami ajouté !");
-      }
-      async function removeFriend(id) {
-        await dbRemoveFriend(id);
-        loadFriends();
-      }
+    });
+  }
+  if(sent.length){
+    html+=`<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(232,228,255,.25);text-transform:uppercase;margin:10px 0 7px">Demandes envoyées</div>`;
+    sent.forEach(f=>{const p=f.addressee,rank=getRankForLevel(p.level);
+      html+=`<div class="friend-row" style="opacity:.55"><div style="flex:1"><div style="font-size:13px;font-weight:600">${p.username}</div><div style="font-size:11px;color:${rank.color}">Rang ${rank.name} • Niv. ${p.level}</div></div><span style="font-size:11px;color:rgba(232,228,255,.28)">En attente...</span></div>`;
+    });
+  }
+  if(!html) html='<div style="font-size:13px;color:rgba(232,228,255,.22);text-align:center;padding:24px 0">Aucun ami pour l\'instant.<br>Recherchez des joueurs ci-dessus.</div>';
+  document.getElementById('friends-list').innerHTML=html;
+}
+async function acceptFriend(id){await dbAcceptFriend(UID,id);loadFriends();toast('Ami ajouté !');}
+async function removeFriend(id){await dbRemoveFriend(id);loadFriends();}
 
-      // ── NAV ───────────────────────────────────────────────────────
-      function goPage(name) {
-        document
-          .querySelectorAll(".page")
-          .forEach((p) => p.classList.remove("on"));
-        document
-          .querySelectorAll(".ntab")
-          .forEach((b) => b.classList.remove("on"));
-        document.getElementById("p-" + name).classList.add("on");
-        document.getElementById("nav-" + name)?.classList.add("on");
-        if (name === "quests") renderQuests();
-        if (name === "titles") renderTitles();
-        if (name === "ranks") renderRanks();
-        if (name === "friends") loadFriends();
-      }
+// ── NAV ───────────────────────────────────────────────────────
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-'+name).classList.add('on');
+  document.getElementById('nav-'+name)?.classList.add('on');
+  if(name==='quests') renderQuests();
+  if(name==='titles') renderTitles();
+  if(name==='ranks')  renderRanks();
+  if(name==='friends') loadFriends();
+}
 
-      // ── MODALS ────────────────────────────────────────────────────
-      function openModal(id) {
-        document.getElementById(id)?.classList.add("on");
-        if (id === "am") {
-          allocPend = {};
-          renderAllocRows();
-        }
-        if (id === "um") renderUrgentModal();
-      }
-      function closeModal(id) {
-        document.getElementById(id)?.classList.remove("on");
-      }
-      function closeModalOut(e, id) {
-        if (e.target.id === id) closeModal(id);
-      }
+// ── MODALS ────────────────────────────────────────────────────
+function openModal(id){
+  document.getElementById(id)?.classList.add('on');
+  if(id==='am'){allocPend={};renderAllocRows();}
+  if(id==='um') renderUrgentModal();
+}
+function closeModal(id){document.getElementById(id)?.classList.remove('on');}
+function closeModalOut(e,id){if(e.target.id===id)closeModal(id);}
 
-      // ── MISC ──────────────────────────────────────────────────────
-      async function doLogout() {
-        Object.values(tmrs).forEach(
-          (t) => t.interval && clearInterval(t.interval),
-        );
-        if (urgentCDInterval) clearInterval(urgentCDInterval);
-        await authSignOut();
-        window.location.href = "index.html";
-      }
-      let _tt = null;
-      function toast(msg) {
-        const el = document.getElementById("toast");
-        el.textContent = msg;
-        el.classList.add("on");
-        clearTimeout(_tt);
-        _tt = setTimeout(() => el.classList.remove("on"), 3200);
-      }
-    </script>
-  </body>
+// ── MISC ──────────────────────────────────────────────────────
+async function doLogout(){
+  Object.values(tmrs).forEach(t=>t.interval&&clearInterval(t.interval));
+  if(urgentCDInterval)clearInterval(urgentCDInterval);
+  await authSignOut();window.location.href='index.html';
+}
+let _tt=null;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),3200);}
+</script>
+</body>
 </html>

@@ -1,449 +1,86 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Solo Leveling — Connexion</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script src="config.js"></script>
-    <script src="db.js"></script>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font-family: "Rajdhani", sans-serif;
-        background: #06060f;
-        color: #e8e4ff;
-        min-height: 100vh;
-      }
-      .bg {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        background:
-          radial-gradient(
-            ellipse 80% 55% at 50% -15%,
-            rgba(90, 80, 200, 0.22) 0%,
-            transparent 60%
-          ),
-          radial-gradient(
-            ellipse 50% 40% at 80% 110%,
-            rgba(217, 76, 122, 0.08) 0%,
-            transparent 50%
-          ),
-          #06060f;
-      }
-      .grid {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        background-image:
-          linear-gradient(rgba(139, 130, 232, 0.035) 1px, transparent 1px),
-          linear-gradient(
-            90deg,
-            rgba(139, 130, 232, 0.035) 1px,
-            transparent 1px
-          );
-        background-size: 60px 60px;
-      }
-      .particle {
-        position: fixed;
-        border-radius: 50%;
-        animation: fup linear infinite;
-        opacity: 0;
-      }
-      @keyframes fup {
-        0% {
-          transform: translateY(100vh);
-          opacity: 0;
-        }
-        10% {
-          opacity: 0.5;
-        }
-        90% {
-          opacity: 0.2;
-        }
-        100% {
-          transform: translateY(-5vh);
-          opacity: 0;
-        }
-      }
-      .card {
-        background: linear-gradient(145deg, #12122a, #0d0d1f);
-        border: 1px solid rgba(139, 130, 232, 0.2);
-        border-radius: 20px;
-        position: relative;
-        overflow: hidden;
-      }
-      .card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(139, 130, 232, 0.5),
-          transparent
-        );
-      }
-      .inp {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(139, 130, 232, 0.22);
-        border-radius: 10px;
-        padding: 11px 15px;
-        color: #e8e4ff;
-        font-family: "Rajdhani", sans-serif;
-        font-size: 15px;
-        font-weight: 500;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-      }
-      .inp:focus {
-        border-color: #8b82e8;
-        box-shadow: 0 0 0 3px rgba(139, 130, 232, 0.1);
-      }
-      .inp::placeholder {
-        color: rgba(232, 228, 255, 0.2);
-      }
-      .btn {
-        width: 100%;
-        background: linear-gradient(135deg, #5a50c8, #8b82e8);
-        border: none;
-        border-radius: 10px;
-        padding: 13px;
-        color: #fff;
-        font-family: "Rajdhani", sans-serif;
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition:
-          opacity 0.2s,
-          box-shadow 0.2s;
-        text-transform: uppercase;
-      }
-      .btn:hover {
-        opacity: 0.88;
-        box-shadow: 0 0 20px rgba(139, 130, 232, 0.35);
-      }
-      .btn:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-      }
-      .err {
-        background: rgba(224, 98, 60, 0.1);
-        border: 1px solid rgba(224, 98, 60, 0.3);
-        border-radius: 8px;
-        padding: 9px 13px;
-        font-size: 13px;
-        color: #f0997b;
-        display: none;
-      }
-      .ok {
-        background: rgba(46, 196, 160, 0.1);
-        border: 1px solid rgba(46, 196, 160, 0.3);
-        border-radius: 8px;
-        padding: 9px 13px;
-        font-size: 13px;
-        color: #5dcaa5;
-        display: none;
-      }
-      .tab {
-        flex: 1;
-        padding: 9px;
-        background: transparent;
-        border: none;
-        color: rgba(232, 228, 255, 0.35);
-        font-family: "Rajdhani", sans-serif;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        cursor: pointer;
-        border-bottom: 2px solid transparent;
-        transition: all 0.2s;
-        text-transform: uppercase;
-      }
-      .tab.on {
-        color: #8b82e8;
-        border-bottom-color: #8b82e8;
-      }
-      label {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        color: rgba(232, 228, 255, 0.4);
-        text-transform: uppercase;
-        margin-bottom: 5px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="bg"></div>
-    <div class="grid"></div>
-    <div id="parts"></div>
-    <div
-      style="position: relative; z-index: 10"
-      class="min-h-screen flex flex-col items-center justify-center px-4 py-10"
-    >
-      <div class="text-center mb-9">
-        <div
-          style="
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: rgba(139, 130, 232, 0.45);
-            font-family: &quot;Cinzel&quot;, serif;
-            margin-bottom: 10px;
-          "
-        >
-          — SYSTÈME DE JOUEURS —
-        </div>
-        <h1
-          style="
-            font-family: &quot;Cinzel&quot;, serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #e8e4ff;
-            letter-spacing: 4px;
-            line-height: 1.1;
-            margin: 0;
-            text-shadow: 0 0 40px rgba(139, 130, 232, 0.4);
-          "
-        >
-          SOLO<br /><span style="color: #8b82e8">LEVELING</span>
-        </h1>
-        <div
-          style="
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: rgba(139, 130, 232, 0.4);
-            font-family: &quot;Cinzel&quot;, serif;
-            margin-top: 10px;
-          "
-        >
-          FORGE TON DESTIN
-        </div>
-      </div>
-      <div class="card p-8 w-full" style="max-width: 380px">
-        <div
-          style="
-            display: flex;
-            border-bottom: 1px solid rgba(139, 130, 232, 0.18);
-            margin-bottom: 24px;
-          "
-        >
-          <button class="tab on" id="tl" onclick="sw('login')">
-            Connexion
-          </button>
-          <button class="tab" id="tr" onclick="sw('register')">
-            Inscription
-          </button>
-        </div>
-        <div id="err" class="err" style="margin-bottom: 14px"></div>
-        <div id="ok" class="ok" style="margin-bottom: 14px"></div>
-        <form id="lf" onsubmit="doLogin(event)">
-          <div style="margin-bottom: 14px">
-            <label>Email</label
-            ><input
-              class="inp"
-              type="email"
-              id="le"
-              placeholder="joueur@domaine.com"
-              required
-              autocomplete="email"
-            />
-          </div>
-          <div style="margin-bottom: 22px">
-            <label>Mot de passe</label
-            ><input
-              class="inp"
-              type="password"
-              id="lp"
-              placeholder="••••••••"
-              required
-              autocomplete="current-password"
-            />
-          </div>
-          <button class="btn" type="submit" id="lb">⚔ Se connecter</button>
-        </form>
-        <form id="rf" style="display: none" onsubmit="doRegister(event)">
-          <div style="margin-bottom: 14px">
-            <label>Nom du joueur</label
-            ><input
-              class="inp"
-              type="text"
-              id="ru"
-              placeholder="Sung Jin-Woo"
-              required
-              maxlength="24"
-            />
-          </div>
-          <div style="margin-bottom: 14px">
-            <label>Email</label
-            ><input
-              class="inp"
-              type="email"
-              id="re"
-              placeholder="joueur@domaine.com"
-              required
-              autocomplete="email"
-            />
-          </div>
-          <div style="margin-bottom: 22px">
-            <label>Mot de passe</label
-            ><input
-              class="inp"
-              type="password"
-              id="rp"
-              placeholder="Minimum 6 caractères"
-              required
-              minlength="6"
-              autocomplete="new-password"
-            />
-          </div>
-          <button class="btn" type="submit" id="rb">
-            ✦ Commencer l'aventure
-          </button>
-        </form>
-      </div>
-      <div
-        style="
-          margin-top: 24px;
-          display: flex;
-          gap: 5px;
-          flex-wrap: wrap;
-          justify-content: center;
-          max-width: 340px;
-        "
-      >
-        <span
-          style="
-            font-size: 10px;
-            color: rgba(232, 228, 255, 0.18);
-            width: 100%;
-            text-align: center;
-            margin-bottom: 4px;
-            font-family: &quot;Cinzel&quot;, serif;
-            letter-spacing: 1px;
-          "
-          >RANGS DISPONIBLES</span
-        >
-        <script>
-          const rc = [
-            ["E", "#9B9A94"],
-            ["D", "#6BBF25"],
-            ["C", "#3E99E8"],
-            ["B", "#D4891A"],
-            ["A", "#E0623C"],
-            ["S", "#D94C7A"],
-            ["SS", "#8B82E8"],
-            ["SSS", "#5A50C8"],
-            ["SSS+", "#BDB5FF"],
-            ["National", "#E8DEFF"],
-            ["Monarque", "#FFD700"],
-          ];
-          rc.forEach(([n, c]) =>
-            document.write(
-              `<span style="font-size:11px;font-weight:700;color:${c};padding:2px 9px;border-radius:20px;border:1px solid ${c}44">${n}</span>`,
-            ),
-          );
-        </script>
-      </div>
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Solo Leveling — Connexion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+  <script src="db.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:'Rajdhani',sans-serif;background:#06060F;color:#E8E4FF;min-height:100vh}
+    .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 55% at 50% -15%,rgba(90,80,200,.22) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 110%,rgba(217,76,122,.08) 0%,transparent 50%),#06060F}
+    .grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(139,130,232,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(139,130,232,.035) 1px,transparent 1px);background-size:60px 60px}
+    .particle{position:fixed;border-radius:50%;animation:fup linear infinite;opacity:0}
+    @keyframes fup{0%{transform:translateY(100vh);opacity:0}10%{opacity:.5}90%{opacity:.2}100%{transform:translateY(-5vh);opacity:0}}
+    .card{background:linear-gradient(145deg,#12122A,#0D0D1F);border:1px solid rgba(139,130,232,.2);border-radius:20px;position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,130,232,.5),transparent)}
+    .inp{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(139,130,232,.22);border-radius:10px;padding:11px 15px;color:#E8E4FF;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;outline:none;transition:border-color .2s,box-shadow .2s}
+    .inp:focus{border-color:#8B82E8;box-shadow:0 0 0 3px rgba(139,130,232,.1)}
+    .inp::placeholder{color:rgba(232,228,255,.2)}
+    .btn{width:100%;background:linear-gradient(135deg,#5A50C8,#8B82E8);border:none;border-radius:10px;padding:13px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:opacity .2s,box-shadow .2s;text-transform:uppercase}
+    .btn:hover{opacity:.88;box-shadow:0 0 20px rgba(139,130,232,.35)}
+    .btn:disabled{opacity:.35;cursor:not-allowed}
+    .err{background:rgba(224,98,60,.1);border:1px solid rgba(224,98,60,.3);border-radius:8px;padding:9px 13px;font-size:13px;color:#F0997B;display:none}
+    .ok{background:rgba(46,196,160,.1);border:1px solid rgba(46,196,160,.3);border-radius:8px;padding:9px 13px;font-size:13px;color:#5DCAA5;display:none}
+    .tab{flex:1;padding:9px;background:transparent;border:none;color:rgba(232,228,255,.35);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase}
+    .tab.on{color:#8B82E8;border-bottom-color:#8B82E8}
+    label{display:block;font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(232,228,255,.4);text-transform:uppercase;margin-bottom:5px}
+  </style>
+</head>
+<body>
+<div class="bg"></div><div class="grid"></div><div id="parts"></div>
+<div style="position:relative;z-index:10" class="min-h-screen flex flex-col items-center justify-center px-4 py-10">
+  <div class="text-center mb-9">
+    <div style="font-size:10px;letter-spacing:3px;color:rgba(139,130,232,.45);font-family:'Cinzel',serif;margin-bottom:10px">— SYSTÈME DE JOUEURS —</div>
+    <h1 style="font-family:'Cinzel',serif;font-size:2.5rem;font-weight:900;color:#E8E4FF;letter-spacing:4px;line-height:1.1;margin:0;text-shadow:0 0 40px rgba(139,130,232,.4)">
+      SOLO<br><span style="color:#8B82E8">LEVELING</span>
+    </h1>
+    <div style="font-size:10px;letter-spacing:3px;color:rgba(139,130,232,.4);font-family:'Cinzel',serif;margin-top:10px">FORGE TON DESTIN</div>
+  </div>
+  <div class="card p-8 w-full" style="max-width:380px">
+    <div style="display:flex;border-bottom:1px solid rgba(139,130,232,.18);margin-bottom:24px">
+      <button class="tab on" id="tl" onclick="sw('login')">Connexion</button>
+      <button class="tab" id="tr" onclick="sw('register')">Inscription</button>
     </div>
+    <div id="err" class="err" style="margin-bottom:14px"></div>
+    <div id="ok" class="ok" style="margin-bottom:14px"></div>
+    <form id="lf" onsubmit="doLogin(event)">
+      <div style="margin-bottom:14px"><label>Email</label><input class="inp" type="email" id="le" placeholder="joueur@domaine.com" required autocomplete="email"/></div>
+      <div style="margin-bottom:22px"><label>Mot de passe</label><input class="inp" type="password" id="lp" placeholder="••••••••" required autocomplete="current-password"/></div>
+      <button class="btn" type="submit" id="lb">⚔ Se connecter</button>
+    </form>
+    <form id="rf" style="display:none" onsubmit="doRegister(event)">
+      <div style="margin-bottom:14px"><label>Nom du joueur</label><input class="inp" type="text" id="ru" placeholder="Sung Jin-Woo" required maxlength="24"/></div>
+      <div style="margin-bottom:14px"><label>Email</label><input class="inp" type="email" id="re" placeholder="joueur@domaine.com" required autocomplete="email"/></div>
+      <div style="margin-bottom:22px"><label>Mot de passe</label><input class="inp" type="password" id="rp" placeholder="Minimum 6 caractères" required minlength="6" autocomplete="new-password"/></div>
+      <button class="btn" type="submit" id="rb">✦ Commencer l'aventure</button>
+    </form>
+  </div>
+  <div style="margin-top:24px;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:340px">
+    <span style="font-size:10px;color:rgba(232,228,255,.18);width:100%;text-align:center;margin-bottom:4px;font-family:'Cinzel',serif;letter-spacing:1px">RANGS DISPONIBLES</span>
     <script>
-      const pc = document.getElementById("parts");
-      for (let i = 0; i < 18; i++) {
-        const p = document.createElement("div");
-        p.className = "particle";
-        p.style.cssText = `left:${Math.random() * 100}vw;width:${1 + Math.random() * 3}px;height:${1 + Math.random() * 3}px;background:#8B82E8;animation-duration:${8 + Math.random() * 12}s;animation-delay:${Math.random() * 15}s`;
-        pc.appendChild(p);
-      }
-      (async () => {
-        const s = await authSession();
-        if (s) {
-          const player = await getPlayer();
-
-          if (player) {
-            window.location.href = "app.html";
-          } else {
-            await authSignOut();
-          }
-        }
-      })();
-      function sw(t) {
-        document.getElementById("lf").style.display =
-          t === "login" ? "block" : "none";
-        document.getElementById("rf").style.display =
-          t === "register" ? "block" : "none";
-        document.getElementById("tl").classList.toggle("on", t === "login");
-        document.getElementById("tr").classList.toggle("on", t === "register");
-        hideMsg();
-      }
-      function showErr(m) {
-        const e = document.getElementById("err");
-        e.textContent = m;
-        e.style.display = "block";
-        document.getElementById("ok").style.display = "none";
-      }
-      function showOk(m) {
-        const e = document.getElementById("ok");
-        e.textContent = m;
-        e.style.display = "block";
-        document.getElementById("err").style.display = "none";
-      }
-      function hideMsg() {
-        document.getElementById("err").style.display = "none";
-        document.getElementById("ok").style.display = "none";
-      }
-      async function doLogin(e) {
-        e.preventDefault();
-        const b = document.getElementById("lb");
-        b.disabled = true;
-        b.textContent = "Connexion...";
-        const { error } = await authSignIn(
-          document.getElementById("le").value,
-          document.getElementById("lp").value,
-        );
-        if (error) {
-          showErr("Email ou mot de passe incorrect.");
-          b.disabled = false;
-          b.textContent = "⚔ Se connecter";
-        } else window.location.href = "app.html";
-      }
-      async function doRegister(e) {
-        e.preventDefault();
-        const b = document.getElementById("rb");
-        b.disabled = true;
-        b.textContent = "Création...";
-        const { error } = await authSignUp(
-          document.getElementById("re").value,
-          document.getElementById("rp").value,
-          document.getElementById("ru").value.trim(),
-        );
-        if (error) {
-          showErr(error.message || "Erreur lors de l'inscription.");
-          b.disabled = false;
-          b.textContent = "✦ Commencer l'aventure";
-        } else {
-          showOk("Compte créé ! Vérifiez votre email puis connectez-vous.");
-          b.disabled = false;
-          b.textContent = "✦ Commencer l'aventure";
-          setTimeout(() => sw("login"), 2500);
-        }
-      }
+      const rc=[['E','#9B9A94'],['D','#6BBF25'],['C','#3E99E8'],['B','#D4891A'],['A','#E0623C'],['S','#D94C7A'],['SS','#8B82E8'],['SSS','#5A50C8'],['SSS+','#BDB5FF'],['National','#E8DEFF'],['Monarque','#FFD700']];
+      rc.forEach(([n,c])=>document.write(`<span style="font-size:11px;font-weight:700;color:${c};padding:2px 9px;border-radius:20px;border:1px solid ${c}44">${n}</span>`));
     </script>
-  </body>
-</html>
+  </div>
+</div>
+<script>
+  const pc=document.getElementById('parts');
+  for(let i=0;i<18;i++){const p=document.createElement('div');p.className='particle';p.style.cssText=`left:${Math.random()*100}vw;width:${1+Math.random()*3}px;height:${1+Math.random()*3}px;background:#8B82E8;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*15}s`;pc.appendChild(p);}
+  (async()=>{
+    const s=await authSession();
+    if(!s) return;
+    const{data,error}=await dbLoadPlayer(s.user.id);
+    if(data&&!error){ window.location.href='app.html'; }
+    else { await authSignOut(); }
+  })();
+  function sw(t){document.getElementById('lf').style.display=t==='login'?'block':'none';document.getElementById('rf').style.display=t==='register'?'block':'none';document.getElementById('tl').classList.toggle('on',t==='login');document.getElementById('tr').classList.toggle('on',t==='register');hideMsg();}
+  function showErr(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';document.getElementById('ok').style.display='none';}
+  function showOk(m){const e=document.getElementById('ok');e.textContent=m;e.style.display='block';document.getElementById('err').style.display='none';}
+  function hideMsg(){document.getElementById('err').style.display='none';document.getElementById('ok').style.display='none';}
+  async function doLogin(e){e.preventDefault();const b=document.getElementById('lb');b.disabled=true;b.textContent='Connexion...';const{error}=await authSignIn(document.getElementById('le').value,document.getElementById('lp').value);if(error){showErr('Email ou mot de passe incorrect.');b.disabled=false;b.textContent='⚔ Se connecter';}else window.location.href='app.html';}
+  async function doRegister(e){e.preventDefault();const b=document.getElementById('rb');b.disabled=true;b.textContent='Création...';const{error}=await authSignUp(document.getElementById('re').value,document.getElementById('rp').value,document.getElementById('ru').value.trim());if(error){showErr(error.message||"Erreur lors de l'inscription.");b.disabled=false;b.textContent="✦ Commencer l'aventure";}else{showOk('Compte créé ! Vérifiez votre email puis connectez-vous.');b.disabled=false;b.textContent="✦ Commencer l'aventure";setTimeout(()=>sw('login'),2500);}}
+</script>
+</body></html>
