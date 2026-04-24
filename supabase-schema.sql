@@ -112,3 +112,42 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ============================================================
+-- TITRE ROI — Attribution manuelle par le créateur
+-- ============================================================
+-- Pour attribuer le titre "Roi" à un joueur, exécuter dans SQL Editor :
+--
+-- UPDATE public.players
+-- SET unlocked_titles = array_append(unlocked_titles, 'roi')
+-- WHERE username = 'NOM_DU_JOUEUR';
+--
+-- Pour le retirer :
+-- UPDATE public.players
+-- SET unlocked_titles = array_remove(unlocked_titles, 'roi'),
+--     active_title = CASE WHEN active_title = 'roi' THEN NULL ELSE active_title END
+-- WHERE username = 'NOM_DU_JOUEUR';
+
+-- ============================================================
+-- FIX RLS — Exécuter ce bloc dans SQL Editor Supabase
+-- Remplace la policy générique par des policies précises
+-- avec WITH CHECK pour garantir que les UPDATEs fonctionnent
+-- ============================================================
+
+-- 1. Supprimer toutes les policies existantes sur players
+DROP POLICY IF EXISTS "players_own" ON public.players;
+DROP POLICY IF EXISTS "players_select_own" ON public.players;
+DROP POLICY IF EXISTS "players_update_own" ON public.players;
+DROP POLICY IF EXISTS "players_insert_own" ON public.players;
+DROP POLICY IF EXISTS "players_read_all" ON public.players;
+
+-- 2. Recréer proprement
+CREATE POLICY "players_select_own" ON public.players
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "players_update_own" ON public.players
+  FOR UPDATE USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "players_insert_own" ON public.players
+  FOR INSERT WITH CHECK (auth.uid() = id);

@@ -25,15 +25,24 @@ async function dbLoadPlayer(uid) {
   return sb().from('players').select('*').eq('id', uid).single();
 }
 
-// Atomic upsert — saves everything in one call to prevent data loss
+// Atomic save — updates all player fields in one call
 async function dbSavePlayer(uid, fields) {
+  // Strip undefined values before sending
+  const clean = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (v !== undefined) clean[k] = v;
+  }
   const { data, error } = await sb()
     .from('players')
-    .update({ ...fields, updated_at: new Date().toISOString() })
+    .update({ ...clean, updated_at: new Date().toISOString() })
     .eq('id', uid)
     .select('*')
     .single();
-  if (error) console.error('dbSavePlayer error', error);
+  if (error) {
+    console.error('[dbSavePlayer] ERREUR:', JSON.stringify(error));
+  } else {
+    console.log('[dbSavePlayer] OK — level:', data.level, 'points:', data.points, 'stats:', JSON.stringify(data.stats));
+  }
   return { data, error };
 }
 

@@ -11,9 +11,37 @@
   <script src="constants.js"></script>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    body{margin:0;font-family:'Rajdhani',sans-serif;background:#06060F;color:#E8E4FF;min-height:100vh;padding-bottom:72px}
+    body{margin:0;font-family:'Rajdhani',sans-serif;background:#06060F;color:#E8E4FF;min-height:100vh;padding-bottom:72px;padding-top:48px}
     .bg-a{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(90,80,200,.18) 0%,transparent 55%),#06060F;pointer-events:none}
     .bg-g{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(139,130,232,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(139,130,232,.028) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+
+    /* Top bar */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:55;height:48px;background:rgba(6,6,15,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(139,130,232,.12);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+    .topbar-logo{font-family:'Cinzel',serif;font-size:.95rem;font-weight:900;color:#8B82E8;letter-spacing:3px}
+    .logout-btn{background:transparent;border:1px solid rgba(139,130,232,.25);border-radius:7px;color:rgba(232,228,255,.4);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 11px;cursor:pointer;transition:all .2s;text-transform:uppercase}
+    .logout-btn:hover{border-color:rgba(224,98,60,.45);color:#F0997B}
+    /* Parchemin modal */
+    .parch-modal{display:none;position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:16px}
+    .parch-modal.on{display:flex}
+    .parch-box{background:linear-gradient(160deg,#1A1508,#0F0D05,#1A1508);border:1px solid rgba(212,137,26,.35);border-radius:16px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;position:relative}
+    .parch-box::before,.parch-box::after{content:'';position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(212,137,26,.5),transparent)}
+    .parch-box::before{top:0;border-radius:16px 16px 0 0}
+    .parch-box::after{bottom:0;border-radius:0 0 16px 16px}
+    .parch-inner{padding:28px 24px}
+    .parch-h1{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:900;color:#D4891A;letter-spacing:3px;text-align:center;margin-bottom:6px}
+    .parch-sub{font-size:10px;letter-spacing:3px;color:rgba(212,137,26,.5);text-align:center;margin-bottom:20px;font-family:'Cinzel',serif}
+    .parch-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,137,26,.3),transparent);margin:16px 0}
+    .parch-section{margin-bottom:18px}
+    .parch-section-title{font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:2px;color:#D4891A;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+    .parch-section-title::before{content:'';display:inline-block;width:16px;height:1px;background:#D4891A;opacity:.5}
+    .parch-section-title::after{content:'';display:inline-block;width:16px;height:1px;background:#D4891A;opacity:.5}
+    .parch-text{font-size:13px;color:rgba(232,220,180,.75);line-height:1.75;font-family:'Rajdhani',sans-serif;font-weight:400}
+    .parch-text strong{color:#D4891A;font-weight:700}
+    .parch-text em{color:rgba(232,220,180,.5);font-style:italic}
+    .parch-warn{background:rgba(224,98,60,.07);border:1px solid rgba(224,98,60,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:rgba(240,153,123,.8);line-height:1.6;margin-top:10px}
+    .parch-gold{background:rgba(212,137,26,.07);border:1px solid rgba(212,137,26,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:rgba(212,137,26,.85);line-height:1.6;margin-top:10px;font-style:italic}
+    @keyframes parchIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .parch-inner{animation:parchIn .4s ease}
 
     /* Bottom nav */
     .bnav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(6,6,15,.97);backdrop-filter:blur(20px);border-top:1px solid rgba(139,130,232,.14);height:64px;display:flex;align-items:stretch}
@@ -23,7 +51,7 @@
     .ntab-icon{font-size:1.25rem;line-height:1}
 
     /* Pages */
-    .page{display:none;min-height:calc(100vh - 64px);padding:14px 0 28px;position:relative;z-index:10}
+    .page{display:none;min-height:calc(100vh - 112px);padding:14px 0 28px;position:relative;z-index:10}
     .page.on{display:block}
     .wrap{max-width:860px;margin:0 auto;padding:0 14px}
 
@@ -118,6 +146,12 @@
 
 <div class="bg-a"></div><div class="bg-g"></div>
 <div class="toast" id="toast"></div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-logo">SL</div>
+  <button class="logout-btn" onclick="doLogout()">Logout</button>
+</div>
 
 <!-- Urgent strip -->
 <div class="ustrip" id="ustrip" onclick="openModal('um')">
@@ -383,7 +417,7 @@
   <button class="ntab" onclick="goPage('titles')" id="nav-titles"><span class="ntab-icon">🏅</span><span>Titres</span></button>
   <button class="ntab" onclick="goPage('friends')" id="nav-friends"><span class="ntab-icon">👥</span><span>Amis</span></button>
   <button class="ntab" onclick="goPage('ranks')" id="nav-ranks"><span class="ntab-icon">👑</span><span>Rangs</span></button>
-  <button class="ntab" onclick="doLogout()" style="flex:.6"><span class="ntab-icon" style="font-size:1rem">🚪</span><span>Quitter</span></button>
+  <button class="ntab" onclick="openModal('parch')" id="nav-parch"><span class="ntab-icon">📜</span><span>Règles</span></button>
 </nav>
 
 <script>
@@ -467,20 +501,26 @@ async function persist(){
 // ════════════════════════════════════════════════════════
 function checkStreak(){
   const last=P.last_active_day, pen=P.penalty_applied_day;
-  if(!last||last===TODAY) return;
+  // Pas de last_active_day = nouveau joueur ou jamais atteint 15 tâches → pas de pénalité
+  if(!last) return;
+  // Déjà traité aujourd'hui
+  if(last===TODAY || pen===TODAY) return;
   const diff=Math.round((dayFromKey(TODAY)-dayFromKey(last))/86400000);
-  if(diff===1) return;
-  if(diff>=2&&pen!==TODAY){
-    P.exp=0; P.streak=0; P.penalty_applied_day=TODAY;
+  // Jours consécutifs → pas de pénalité
+  if(diff<=1) return;
+  // Gap de 2+ jours → pénalité : reset EXP uniquement, stats et niveau conservés
+  P.exp=0; P.streak=0; P.penalty_applied_day=TODAY;
+  // Sauvegarder immédiatement avant d'afficher la modal
+  persist().then(()=>{
     setTimeout(()=>showPenaltyModal(diff-1),800);
-  }
+  });
 }
 function dayFromKey(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m,d);}
 function showPenaltyModal(days){
   document.getElementById('pen-text').innerHTML=`Vous avez raté <strong style="color:#E0623C">${days} jour${days>1?'s':''}</strong> sans atteindre 15 tâches.<br><br>Le Système a effacé votre EXP du niveau actuel.<br><span style="font-size:11px;color:rgba(232,228,255,.35)">Niveau conservé — EXP remise à 0</span>`;
   document.getElementById('pen-modal').classList.add('on');
 }
-async function closePenalty(){document.getElementById('pen-modal').classList.remove('on');await persist();renderProfile();}
+function closePenalty(){document.getElementById('pen-modal').classList.remove('on');renderProfile();}
 
 async function maybeUpdateStreak(){
   const cnt=Object.values(taskProg).filter(t=>t.completed).length;
@@ -502,6 +542,8 @@ async function gainExp(amount){
     P.exp-=expRequired(P.level);
     P.level++; P.points+=3; leveled=true; lastLvl=P.level;
   }
+  // Sauvegarde immediate - ne pas attendre la fermeture de modal
+  await persist();
   if(leveled) setTimeout(()=>showLevelUp(lastLvl),500);
 }
 
@@ -541,7 +583,6 @@ function showLevelUp(level){
 }
 async function closeLevelUp(){
   closeModal('lum');
-  await persist();
   renderAll();
   if(titleQueue.length) setTimeout(showNextTitle,350);
 }
@@ -933,20 +974,24 @@ function renderTitles(){
   for(const rar of RARITY_ORDER){
     const group=TITLES.filter(t=>t.rarity===rar);if(!group.length)continue;
     const rc=RARITY_COLORS[rar];
+    const isCreator=(rar==='creator');
     html+=`<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:${rc};text-transform:uppercase;margin:16px 0 8px;display:flex;align-items:center;gap:7px">
       <div style="width:3px;height:11px;background:${rc};border-radius:2px;flex-shrink:0"></div>
-      ${RARITY_LABELS[rar]}
-      <span style="color:rgba(232,228,255,.18)">(${group.filter(t=>have.has(t.id)).length}/${group.length})</span>
+      ${isCreator?'👑 ':''}${RARITY_LABELS[rar]}
+      ${!isCreator?`<span style="color:rgba(232,228,255,.18)">(${group.filter(t=>have.has(t.id)).length}/${group.length})</span>`:'<span style="color:'+rc+'66;font-size:9px"> — Attribué par le Créateur</span>'}
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:7px">`;
     for(const t of group){
       const unlocked=have.has(t.id),isAct=t.id===P.active_title;
+      const showLabel=unlocked||isCreator;
       html+=`<div class="tcrd ${unlocked?'':'lk'} ${isAct?'act':''}"
-        style="border-color:${unlocked?t.color+'40':'rgba(232,228,255,.07)'};background:${unlocked?t.color+'08':'rgba(255,255,255,.015)'};color:${t.color}"
+        style="border-color:${unlocked?t.color+'44':(isCreator?t.color+'18':'rgba(232,228,255,.07)')};background:${unlocked?t.color+'09':(isCreator?'rgba(255,45,85,0.04)':'rgba(255,255,255,.015)')};color:${t.color};${unlocked&&isCreator?'box-shadow:0 0 18px '+t.color+'33;':''}"
         onclick="${unlocked?`activateTitle('${t.id}')`:''}" >
-        <div style="font-size:13px;font-weight:700;font-style:italic;color:${unlocked?t.color:'rgba(232,228,255,.16)'};">${unlocked?'「'+t.label+'」':'???'}</div>
+        ${isCreator&&unlocked?`<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:${t.color};margin-bottom:5px;opacity:.7">👑 TITRE DU CRÉATEUR</div>`:''}
+        <div style="font-size:13px;font-weight:700;font-style:italic;color:${unlocked?t.color:(isCreator?t.color+'44':'rgba(232,228,255,.16)')};${unlocked&&isCreator?'text-shadow:0 0 12px '+t.color+'55':''}">${showLabel?'「'+t.label+'」':'???'}</div>
         <div style="font-size:10px;color:rgba(232,228,255,.25);margin-top:3px">${t.desc}</div>
         ${unlocked?`<div style="font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:8px;border:1px solid ${rc}3A;background:${rc}0F;color:${rc};display:inline-block;margin-top:5px">${RARITY_LABELS[rar]}</div>`:''}
+        ${!unlocked&&isCreator?`<div style="font-size:9px;color:${rc}55;margin-top:5px;letter-spacing:.5px">Non attribué</div>`:''}
       </div>`;
     }
     html+='</div>';
@@ -1046,11 +1091,33 @@ function allocDec(k){if(!allocPend[k])return;allocPend[k]=Math.max(0,allocPend[k
 async function confirmAlloc(){
   const tot=Object.values(allocPend).reduce((a,b)=>a+b,0);
   if(!tot){closeModal('am');return;}
+  // Apply locally
   Object.entries(allocPend).forEach(([k,v])=>{P.stats[k]+=v;});
   P.points-=tot;
   const newTs=checkNewTitles(P);
   if(newTs.length){P.unlocked_titles=[...P.unlocked_titles,...newTs.map(t=>t.id)];titleQueue.push(...newTs.map(t=>t.id));}
-  await persist();
+  // Save and verify — read back what DB actually stored
+  const {data,error}=await dbSavePlayer(UID,{
+    stats:P.stats, points:P.points,
+    unlocked_titles:P.unlocked_titles, active_title:P.active_title,
+    level:P.level, exp:P.exp,
+    total_quests_completed:P.total_quests_completed,
+    urgent_quests_completed:P.urgent_quests_completed,
+    streak:P.streak, last_active_day:P.last_active_day,
+    penalty_applied_day:P.penalty_applied_day,
+    completed_trials:P.completed_trials,
+  });
+  if(error){
+    toast('⚠ Erreur de sauvegarde !');
+    return;
+  }
+  // Update P from DB response to guarantee sync
+  if(data){
+    P.stats=data.stats;
+    P.points=data.points;
+    P.level=data.level;
+    P.exp=data.exp;
+  }
   closeModal('am');
   renderAll();
   toast(tot+' pt'+(tot>1?'s':'')+' alloué'+(tot>1?'s':'')+'!');
@@ -1134,7 +1201,7 @@ async function setUrgReps(tid,val,req){
   refreshUrgent();
 }
 function toggleUrgTimer(tid,reqMin){
-  const key='u_urgent_'+tid;
+  const key='u_'+urgentActive.questDef.id+'_'+tid;
   _toggleTimer(key,reqMin,async()=>{
     urgentTProg[tid]={value:reqMin,completed:true};
     await dbSaveTask(UID,'urgent',tid,'urg_'+urgentActive.instance.instanceId,reqMin,true);
@@ -1230,7 +1297,9 @@ async function removeFriend(id){await dbRemoveFriend(id);loadFriends();}
 function goPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
-  document.getElementById('p-'+name).classList.add('on');
+  const pageEl=document.getElementById('p-'+name);
+  if(!pageEl) return; // e.g. 'parch' is a modal, not a page
+  pageEl.classList.add('on');
   document.getElementById('nav-'+name)?.classList.add('on');
   if(name==='quests') renderQuests();
   if(name==='titles') renderTitles();
@@ -1256,5 +1325,138 @@ async function doLogout(){
 let _tt=null;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),3200);}
 </script>
+
+<!-- PARCHEMIN DES RÈGLES -->
+<div class="parch-modal" id="parch" onclick="closeModalOut(event,'parch')">
+  <div class="parch-box">
+    <div class="parch-inner">
+      <div class="parch-h1">PARCHEMIN DU SYSTÈME</div>
+      <div class="parch-sub">— Lois du Joueur —</div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">Préambule</div>
+        <div class="parch-text">
+          Ce système existe pour une seule raison : <strong>ton développement</strong>.<br>
+          Physique. Mental. Social. Financier. Chaque aspect de ta vie est un attribut à forger.<br><br>
+          <em>Il n'y a pas de juge ici, pas de classement, pas d'audience. Il n'y a que toi, le Système, et la personne que tu choisis de devenir.</em>
+        </div>
+        <div class="parch-gold">
+          "La triche n'a aucun intérêt. Tu ne trompes personne d'autre que toi-même. Le Système mesure ta progression réelle — et seule la progression réelle a de la valeur."
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">I — Les Quêtes</div>
+        <div class="parch-text">
+          Chaque jour, <strong>7 quêtes quotidiennes</strong> sont disponibles, couvrant tes 7 attributs :<br>
+          ⚔️ Force · 🛡️ Endurance · 💨 Agilité · 🧠 Intelligence · 👁️ Perception · ✨ Charisme · 💰 Richesse<br><br>
+          Des <strong>quêtes urgentes</strong> peuvent se déclencher à tout moment — avec un compte à rebours. Une seule par jour. Elles rapportent plus d'EXP mais exigent une réaction immédiate.<br><br>
+          <em>Les quêtes doivent être accomplies dans la bonne foi. Un Joueur qui cochait sans agir ne grandit pas — il s'illusionne.</em>
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">II — L'EXP et les Niveaux</div>
+        <div class="parch-text">
+          Compléter une quête rapporte de l'<strong>EXP</strong>. Accumuler suffisamment d'EXP fait monter de niveau.<br>
+          Chaque niveau débloque <strong>+3 points à allouer</strong> dans tes statistiques.<br><br>
+          Il n'y a <strong>pas de plafond de niveau</strong>. Le Système grandit avec toi, indéfiniment.
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">III — Les Statistiques & Points</div>
+        <div class="parch-text">
+          À chaque montée de niveau, tu reçois <strong>3 points</strong> à répartir librement entre tes 7 attributs.<br>
+          <strong>1 point alloué = +1 dans la statistique choisie.</strong><br><br>
+          Mais attention — <strong>plus une statistique est élevée, plus ses quêtes associées deviennent exigeantes.</strong><br><br>
+          Exemple : si tu investis massivement en Force, tes objectifs de pompes, squats, dips et tractions augmenteront en proportion. Le Système s'adapte à ton niveau réel.<br><br>
+          <em>Distribue tes points avec sagesse. Un guerrier sans endurance s'effondre. Un sage sans charisme reste seul.</em>
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">IV — Le Streak et la Pénalité</div>
+        <div class="parch-text">
+          Accomplir au moins <strong>15 tâches par jour</strong> maintient ton streak actif 🔥<br><br>
+          Si tu passes une journée entière sans atteindre 15 tâches complétées, <strong>le Système applique une pénalité</strong> :<br>
+          → Ton <strong>EXP du niveau actuel est remis à zéro</strong>.<br>
+          → Ton niveau et tes statistiques sont conservés.<br>
+          → Ton streak repart à 0.<br><br>
+          <em>La discipline n'est pas une option. Un Joueur qui abandonne le chemin recule.</em>
+        </div>
+        <div class="parch-warn">
+          ⚠ La pénalité n'est pas une punition arbitraire. Elle représente la réalité biologique : une journée sans effort est une journée de régression. Le Système ne fait que l'officialiser.
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">V — Les Rangs & Épreuves</div>
+        <div class="parch-text">
+          Il existe <strong>11 rangs</strong>, du plus humble au plus élevé :<br><br>
+          <strong style="color:#9B9A94">E</strong> (niv. 1) → <strong style="color:#6BBF25">D</strong> (5) → <strong style="color:#3E99E8">C</strong> (10) → <strong style="color:#D4891A">B</strong> (20) → <strong style="color:#E0623C">A</strong> (35) → <strong style="color:#D94C7A">S</strong> (50) → <strong style="color:#8B82E8">SS</strong> (70) → <strong style="color:#5A50C8">SSS</strong> (90) → <strong style="color:#BDB5FF">SSS+</strong> (110) → <strong style="color:#E8DEFF">National</strong> (140) → <strong style="color:#FFD700">Monarque</strong> (200)<br><br>
+          <strong>Atteindre le niveau requis ne suffit pas.</strong> Pour chaque transition de rang, une <strong>Épreuve</strong> doit être complétée. Ces épreuves sont des défis one-shot progressivement plus intenses — corps, esprit, et discipline réunis.<br><br>
+          L'Épreuve apparaît sur ton profil une fois le niveau requis atteint. Elle doit être accomplie en une seule session, dans la bonne foi.
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">VI — Les Titres</div>
+        <div class="parch-text">
+          Des <strong>titres</strong> peuvent être débloqués en accomplissant certaines conditions : niveaux atteints, statistiques développées, quêtes accumulées, streak maintenu...<br><br>
+          Un titre actif s'affiche sous ton nom sur ton profil. Il ne dit pas seulement qui tu es — il dit ce que tu as accompli.<br><br>
+          Il existe <strong>6 raretés</strong> de titres : Commun, Peu commun, Rare, Épique, Légendaire, Mythique.
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">VII — Le Titre de Roi 👑</div>
+        <div class="parch-text">
+          Il existe un titre d'une rareté à part entière : <strong style="color:#FF2D55">Roi</strong>.<br><br>
+          Ce titre n'est pas débloqué automatiquement. Il ne peut être attribué que par <strong>le Créateur du Système</strong>, après vérification personnelle.<br><br>
+          Les conditions :<br>
+          → Atteindre le <strong>niveau 500</strong><br>
+          → Passer un <strong>test en direct</strong> avec le Créateur — épreuve physique, mentale, et de discipline, adaptée au niveau du joueur<br>
+          → Avoir démontré une <strong>progression réelle et documentée</strong> dans sa vie<br><br>
+          <em>Ce titre ne récompense pas le jeu. Il récompense la transformation.</em>
+        </div>
+        <div class="parch-gold">
+          "Un Roi n'est pas celui qui a atteint un chiffre. C'est celui dont la vie elle-même témoigne de ce qu'il est devenu."
+        </div>
+      </div>
+
+      <div class="parch-divider"></div>
+
+      <div class="parch-section">
+        <div class="parch-section-title">Serment du Joueur</div>
+        <div class="parch-gold">
+          "Je joue pour moi. Pas pour un classement, pas pour une validation extérieure. Je valide honnêtement chaque tâche accomplie. Je sais que tricher ici ne triche que sur ma propre vie.<br><br>
+          Le Système est un miroir. Ce qu'il reflète, c'est ce que je mets dedans."
+        </div>
+      </div>
+
+      <div style="margin-top:20px;text-align:center">
+        <button onclick="closeModal('parch')" style="background:linear-gradient(135deg,rgba(212,137,26,.3),rgba(212,137,26,.15));border:1px solid rgba(212,137,26,.4);border-radius:9px;padding:10px 28px;color:#D4891A;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase">
+          J'ai lu et compris
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
