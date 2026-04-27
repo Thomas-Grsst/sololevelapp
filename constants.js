@@ -96,6 +96,10 @@ function statRankLabel(val) {
   return "E";
 }
 function statRankColor(val) {
+  if (val >= 400) return "#FFD700";
+  if (val >= 285) return "#E8DEFF";
+  if (val >= 210) return "#5A50C8";
+  if (val >= 150) return "#8B82E8";
   if (val >= 100) return "#D94C7A";
   if (val >= 70) return "#E0623C";
   if (val >= 45) return "#D4891A";
@@ -1858,13 +1862,13 @@ const RANK_TRIALS = [
 
 // Get the trial the player needs to unlock their next rank
 function getAvailableTrial(player) {
-  const nextRank = getNextRank(player.level);
-  if (!nextRank) return null; // already at Monarque
-  const trial = RANK_TRIALS.find((t) => t.forRank === nextRank.name);
+  const currentRank = getRankForLevel(player.level);
+  // Cherche le trial correspondant au rang actuel du joueur
+  const trial = RANK_TRIALS.find((t) => t.forRank === currentRank.name);
   if (!trial) return null;
-  // Only show if player has reached the required level
+  // Seulement si le joueur a atteint le niveau requis
   if (player.level < trial.requiredLevel) return null;
-  // Already passed?
+  // Déjà passé ?
   if ((player.completed_trials || []).includes(trial.id)) return null;
   return trial;
 }
