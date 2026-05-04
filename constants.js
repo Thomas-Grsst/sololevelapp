@@ -84,10 +84,9 @@ const RANKS = [
 
 // Rank for any stat value (used in spider chart labels)
 function statRankLabel(val) {
-  if (val >= 400) return "Monarche";
-  if (val >= 285) return "National";
-  if (val >= 210) return "SSS";
-  if (val >= 150) return "SS";
+  if (val >= 300) return "National";
+  if (val >= 200) return "SSS";
+  if (val >= 140) return "SS";
   if (val >= 100) return "S";
   if (val >= 70) return "A";
   if (val >= 45) return "B";
@@ -96,10 +95,9 @@ function statRankLabel(val) {
   return "E";
 }
 function statRankColor(val) {
-  if (val >= 400) return "#FFD700";
-  if (val >= 285) return "#E8DEFF";
-  if (val >= 210) return "#5A50C8";
-  if (val >= 150) return "#8B82E8";
+  if (val >= 300) return "#E8DEFF";
+  if (val >= 200) return "#5A50C8";
+  if (val >= 140) return "#8B82E8";
   if (val >= 100) return "#D94C7A";
   if (val >= 70) return "#E0623C";
   if (val >= 45) return "#D4891A";
@@ -168,6 +166,7 @@ function expRequired(level) {
 function getRankForLevel(level) {
   let r = RANKS[0];
   for (let i = RANKS.length - 1; i >= 0; i--) {
+    //parcours en sens inverse
     if (level >= RANKS[i].minLvl) {
       r = RANKS[i];
       break;
@@ -177,9 +176,10 @@ function getRankForLevel(level) {
 }
 function getNextRank(level) {
   for (const r of RANKS) {
+    //parcours dans l'ordre
     if (r.minLvl > level) return r;
   }
-  return null; // beyond Monarque → no next rank shown
+  return null; // après monarque pas de rank
 }
 
 // ── Task scaling ──────────────────────────────────────────────
@@ -188,7 +188,7 @@ function getTaskRequired(task, stats) {
   const sv = stats[task.scaleKey] || 5;
   const bonus = Math.max(0, sv - 5);
   if (task.type === "timer")
-    return Math.max(task.baseMin, task.baseMin + Math.floor(bonus * 0.5));
+    return Math.max(task.baseMin, task.baseMin + Math.floor(bonus * 0.5)); // 2 stats = 1 min
   return Math.max(task.baseReps, task.baseReps + Math.floor(bonus * 1.0)); // 1 stat pt = 1 rep
 }
 
@@ -639,7 +639,7 @@ const URGENT_POOL = [
 ];
 
 function pickRandomUrgentQuest() {
-  return URGENT_POOL[Math.floor(Math.random() * URGENT_POOL.length)];
+  return URGENT_POOL[Math.floor(Math.random() * URGENT_POOL.length)]; //random entre 0 et 1 exclu * tableau, arrondi a l'entier inferieur
 }
 
 // ── Titles (50+) ──────────────────────────────────────────────
@@ -961,7 +961,7 @@ const TITLES = [
     label: "Polyvalent",
     rarity: "epic",
     color: "#A96BE8",
-    condition: { type: "allstats", value: 20 },
+    condition: { type: "allstats", value: 50 },
     desc: "Toutes les stats ≥ 20.",
   },
   {
@@ -1026,7 +1026,7 @@ const TITLES = [
     label: "Transcendant",
     rarity: "legendary",
     color: "#BDB5FF",
-    condition: { type: "allstats", value: 50 },
+    condition: { type: "allstats", value: 75 },
     desc: "Toutes les stats ≥ 50.",
   },
   {
@@ -1174,7 +1174,7 @@ const RANK_TRIALS = [
         id: "t2",
         name: "Tractions",
         type: "reps",
-        baseReps: 8,
+        baseReps: 10,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1193,12 +1193,6 @@ const RANK_TRIALS = [
         baseMin: 10,
         scaleKey: "intelligence",
         desc: "10 min de lecture sérieuse",
-      },
-      {
-        id: "t5",
-        name: "Soin personnel",
-        type: "check",
-        desc: "Douche + tenue soignée",
       },
     ],
   },
@@ -1241,7 +1235,7 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Tractions",
         type: "reps",
-        baseReps: 12,
+        baseReps: 15,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1249,7 +1243,7 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Concentration",
         type: "timer",
-        baseMin: 15,
+        baseMin: 10,
         scaleKey: "intelligence",
         desc: "15 min de focus absolu",
       },
@@ -1265,7 +1259,7 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Rituel complet",
         type: "check",
-        desc: "Douche + soin du visage + tenue",
+        desc: "Soin du visage + tenue",
       },
     ],
   },
@@ -1316,7 +1310,7 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Planche",
         type: "reps",
-        baseReps: 120,
+        baseReps: 180,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1340,7 +1334,7 @@ const RANK_TRIALS = [
         id: "t8",
         name: "Méditation",
         type: "timer",
-        baseMin: 15,
+        baseMin: 10,
         scaleKey: "perception",
         desc: "Pleine conscience",
       },
@@ -1348,15 +1342,9 @@ const RANK_TRIALS = [
         id: "t9",
         name: "Business",
         type: "timer",
-        baseMin: 15,
+        baseMin: 20,
         scaleKey: "richesse",
         desc: "Travail sur ton projet",
-      },
-      {
-        id: "t10",
-        name: "Rituel complet",
-        type: "check",
-        desc: "Douche + rasage + soin + tenue",
       },
     ],
   },
@@ -1407,7 +1395,7 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Planche",
         type: "reps",
-        baseReps: 180,
+        baseReps: 200,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1431,7 +1419,7 @@ const RANK_TRIALS = [
         id: "t8",
         name: "Méditation",
         type: "timer",
-        baseMin: 20,
+        baseMin: 10,
         scaleKey: "perception",
         desc: "Pleine conscience avancée",
       },
@@ -1447,7 +1435,7 @@ const RANK_TRIALS = [
         id: "t10",
         name: "Rituel royal",
         type: "check",
-        desc: "Douche froide + rasage + soin + tenue impeccable",
+        desc: "Douche froide + soin",
       },
     ],
   },
@@ -1466,7 +1454,7 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 150,
+        baseReps: 100,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1482,7 +1470,7 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Burpees",
         type: "reps",
-        baseReps: 60,
+        baseReps: 40,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1498,7 +1486,7 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Focus total",
         type: "timer",
-        baseMin: 45,
+        baseMin: 20,
         scaleKey: "intelligence",
         desc: "Concentration absolue",
       },
@@ -1506,7 +1494,7 @@ const RANK_TRIALS = [
         id: "t6",
         name: "Méditation profonde",
         type: "timer",
-        baseMin: 30,
+        baseMin: 15,
         scaleKey: "perception",
         desc: "Conscience totale",
       },
@@ -1514,7 +1502,7 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Sprint business",
         type: "timer",
-        baseMin: 45,
+        baseMin: 30,
         scaleKey: "richesse",
         desc: "Deep work session",
       },
@@ -1541,7 +1529,7 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 200,
+        baseReps: 150,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1557,7 +1545,7 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Dips",
         type: "reps",
-        baseReps: 80,
+        baseReps: 60,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1589,7 +1577,7 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 45,
+        baseMin: 30,
         scaleKey: "perception",
         desc: "Éveil profond",
       },
@@ -1624,7 +1612,7 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 250,
+        baseReps: 200,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1640,7 +1628,7 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Squats",
         type: "reps",
-        baseReps: 200,
+        baseReps: 150,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1648,7 +1636,7 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Burpees",
         type: "reps",
-        baseReps: 100,
+        baseReps: 60,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1672,7 +1660,7 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 60,
+        baseMin: 20,
         scaleKey: "perception",
         desc: "Conscience totale",
       },
@@ -1707,7 +1695,7 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 300,
+        baseReps: 220,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1731,7 +1719,7 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Burpees",
         type: "reps",
-        baseReps: 120,
+        baseReps: 50,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1747,15 +1735,15 @@ const RANK_TRIALS = [
         id: "t6",
         name: "Deep work",
         type: "timer",
-        baseMin: 120,
+        baseMin: 30,
         scaleKey: "intelligence",
-        desc: "2 heures de concentration",
+        desc: "30 minutes de concentration",
       },
       {
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 60,
+        baseMin: 20,
         scaleKey: "perception",
         desc: "Maîtrise intérieure",
       },
@@ -1790,7 +1778,7 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 500,
+        baseReps: 250,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1806,7 +1794,7 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Squats",
         type: "reps",
-        baseReps: 300,
+        baseReps: 200,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1814,7 +1802,7 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Burpees",
         type: "reps",
-        baseReps: 150,
+        baseReps: 100,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1830,15 +1818,15 @@ const RANK_TRIALS = [
         id: "t6",
         name: "Deep work",
         type: "timer",
-        baseMin: 180,
+        baseMin: 30,
         scaleKey: "intelligence",
-        desc: "3 heures de travail profond",
+        desc: "30 minutes de travail profond",
       },
       {
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 90,
+        baseMin: 20,
         scaleKey: "perception",
         desc: "Éveil total",
       },

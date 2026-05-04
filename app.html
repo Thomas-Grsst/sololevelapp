@@ -464,6 +464,19 @@ async function loadAll(){
   if(qr.data) qr.data.forEach(r=>completedQ.add(r.quest_id));
   if(tr.data) tr.data.forEach(r=>{taskProg[r.quest_id+'_'+r.task_id]={value:r.value,completed:r.completed};});
 
+  // Restaurer progression du trial de rang (persistée en DB)
+  if(P.trial_progress && P.trial_started_at){
+    const trialAge=Date.now()-new Date(P.trial_started_at).getTime();
+    if(trialAge < 24*60*60*1000){
+      // Moins de 24h : restaurer la progression
+      trialTProg=Object.assign({},P.trial_progress);
+    } else {
+      // Plus de 24h : reset le trial
+      P.trial_started_at=null; P.trial_progress=null;
+      trialTProg={};
+    }
+  }
+
   // Restore urgent
   if(ur.data&&!ur.data.completed&&!ur.data.failed){
     const exp=new Date(ur.data.expires_at).getTime();
@@ -493,6 +506,8 @@ async function persist(){
     completed_trials:P.completed_trials,
     unlocked_titles:P.unlocked_titles,active_title:P.active_title,
     stats:P.stats,
+    trial_started_at:P.trial_started_at||null,
+    trial_progress:P.trial_progress||null,
   });
 }
 
@@ -539,6 +554,11 @@ async function gainExp(amount){
   P.exp+=amount;
   let leveled=false,lastLvl=0;
   while(P.exp>=expRequired(P.level)){
+    // Bloquer la montée de niveau si une épreuve de rang est en attente
+    if(getAvailableTrial(P)){
+      P.exp=expRequired(P.level)-1; // bloqué juste en dessous du seuil
+      break;
+    }
     P.exp-=expRequired(P.level);
     P.level++; P.points+=3; leveled=true; lastLvl=P.level;
   }
@@ -860,7 +880,9 @@ function refreshQuest(qid){
   const td=q.tasks.filter(t=>(taskProg[q.id+'_'+t.id]||{}).completed).length;
   const all=td===q.tasks.length,qDone=completedQ.has(qid);
   const tc=document.getElementById('qt-'+qid);
-  if(tc) tc.innerHTML=q.tasks.map(t=>taskHTML(q,t,false,false)).join('');
+  // Ne recréer les tâches que si aucun timer n'est en cours pour cette quête (évite le reset visuel)
+  const hasRunningQTimer=q.tasks.some(t=>tmrs[qid+'_'+t.id]?.running);
+  if(tc && !hasRunningQTimer) tc.innerHTML=q.tasks.map(t=>taskHTML(q,t,false,false)).join('');
   const qp=document.getElementById('qp-'+qid);if(qp)qp.style.width=(td/q.tasks.length*100)+'%';
   const btn=document.getElementById('qb-'+qid);
   if(btn&&!qDone){btn.disabled=!all;btn.textContent=all?`Valider (+${q.expReward} EXP)`:`${td}/${q.tasks.length} tâches`;}
@@ -890,7 +912,15 @@ async function completeQuest(qid,expR){
 function openTrialModal(){
   const trial=getAvailableTrial(P);
   if(!trial) return;
-  trialTProg={};
+  // Ne PAS reset trialTProg si un trial est déjà en cours (timer en marche)
+  // Initialiser trial_started_at seulement si c'est la première ouverture
+  if(!P.trial_started_at || !P.trial_progress){
+    if(Object.keys(trialTProg).length===0){
+      P.trial_started_at=new Date().toISOString();
+      P.trial_progress={};
+      persist();
+    }
+  }
   document.getElementById('tm-subtitle').textContent=trial.subtitle.toUpperCase();
   document.getElementById('tm-subtitle').style.color=trial.color;
   document.getElementById('tm-icon').textContent=trial.icon;
@@ -908,22 +938,32 @@ function renderTrialTasks(trial){
   const q={id:'trial',color:trial.color};
   const td=trial.tasks.filter(t=>(trialTProg['tr_'+t.id]||{}).completed).length;
   const all=td===trial.tasks.length;
-  document.getElementById('tm-tasks').innerHTML=trial.tasks.map(t=>taskHTML(q,t,false,true)).join('');
+  // Ne recréer les tâches que si aucun timer trial n'est en cours (évite le reset visuel)
+  const hasRunningTimer=Object.keys(tmrs).some(k=>k.startsWith('trial_')&&tmrs[k]?.running);
+  if(!hasRunningTimer){
+    document.getElementById('tm-tasks').innerHTML=trial.tasks.map(t=>taskHTML(q,t,false,true)).join('');
+  }
   document.getElementById('tm-btn').innerHTML=`<button class="cbtn" style="background:linear-gradient(135deg,${trial.color}BB,${trial.color})" onclick="completeTrial()" ${all?'':'disabled'}>
     ${all?`ÉPREUVE VALIDÉE (+${trial.expReward} EXP)`:`${td}/${trial.tasks.length} tâches accomplies`}
   </button>`;
 }
 
+function saveTrialProgress(){
+  P.trial_progress=Object.assign({},trialTProg);
+  persist();
+}
 function toggleTrialCheck(tid){
   const key='tr_'+tid;
   const cur=(trialTProg[key]||{}).completed;
   trialTProg[key]={value:1,completed:!cur};
+  saveTrialProgress();
   const trial=getAvailableTrial(P);
   if(trial) renderTrialTasks(trial);
 }
 function setTrialReps(tid,val,req){
   const num=parseInt(val)||0,done=num>=req;
   trialTProg['tr_'+tid]={value:num,completed:done};
+  saveTrialProgress();
   const trial=getAvailableTrial(P);
   if(trial) renderTrialTasks(trial);
 }
@@ -933,6 +973,7 @@ function toggleTrialTimer(tid,reqMin){
   const key='trial_trial_'+tid;
   _toggleTimer(key,reqMin,()=>{
     trialTProg['tr_'+tid]={value:reqMin,completed:true};
+    saveTrialProgress();
     if(trial) renderTrialTasks(trial);
     toast('Session terminée ✓');
   });
@@ -942,6 +983,13 @@ async function completeTrial(){
   const trial=getAvailableTrial(P);
   if(!trial) return;
   P.completed_trials=[...(P.completed_trials||[]),trial.id];
+  // Reset trial en cours
+  P.trial_started_at=null; P.trial_progress=null; trialTProg={};
+  // Vider les timers trial
+  Object.keys(tmrs).filter(k=>k.startsWith('trial_')).forEach(k=>{
+    if(tmrs[k]?.interval) clearInterval(tmrs[k].interval);
+    delete tmrs[k];
+  });
   const newTs=checkNewTitles(P);
   if(newTs.length){P.unlocked_titles=[...P.unlocked_titles,...newTs.map(t=>t.id)];titleQueue.push(...newTs.map(t=>t.id));}
   await gainExp(trial.expReward);

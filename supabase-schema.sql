@@ -151,3 +151,11 @@ CREATE POLICY "players_update_own" ON public.players
 
 CREATE POLICY "players_insert_own" ON public.players
   FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- ============================================================
+-- PATCH v4 — Colonnes pour épreuve de rang persistée
+-- Exécuter dans SQL Editor Supabase
+-- ============================================================
+ALTER TABLE public.players
+  ADD COLUMN IF NOT EXISTS trial_started_at timestamptz DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS trial_progress jsonb DEFAULT NULL;
