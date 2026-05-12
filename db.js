@@ -29,7 +29,7 @@ async function dbLoadPlayer(uid) {
   return sb().from("players").select("*").eq("id", uid).single();
 }
 
-// updates all player fields in one call - save all
+// Atomic save — updates all player fields in one call
 async function dbSavePlayer(uid, fields) {
   // Strip undefined values before sending
   const clean = {};

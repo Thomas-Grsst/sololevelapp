@@ -83,26 +83,32 @@ const RANKS = [
 ];
 
 // Rank for any stat value (used in spider chart labels)
+// Seuils calculés : BASE 5 + (3pts/lvl × niveaux du rang) / 7 stats
+// E<7 | D≥7 | C≥9 | B≥13 | A≥20 | S≥26 | SS≥35 | SSS≥43 | SSS+≥52 | National≥65 | Monarque≥90
 function statRankLabel(val) {
-  if (val >= 300) return "National";
-  if (val >= 200) return "SSS";
-  if (val >= 140) return "SS";
-  if (val >= 100) return "S";
-  if (val >= 70) return "A";
-  if (val >= 45) return "B";
-  if (val >= 25) return "C";
-  if (val >= 12) return "D";
+  if (val >= 90) return "Monarque";
+  if (val >= 65) return "National";
+  if (val >= 52) return "SSS+";
+  if (val >= 43) return "SSS";
+  if (val >= 35) return "SS";
+  if (val >= 26) return "S";
+  if (val >= 20) return "A";
+  if (val >= 13) return "B";
+  if (val >= 9) return "C";
+  if (val >= 7) return "D";
   return "E";
 }
 function statRankColor(val) {
-  if (val >= 300) return "#E8DEFF";
-  if (val >= 200) return "#5A50C8";
-  if (val >= 140) return "#8B82E8";
-  if (val >= 100) return "#D94C7A";
-  if (val >= 70) return "#E0623C";
-  if (val >= 45) return "#D4891A";
-  if (val >= 25) return "#3E99E8";
-  if (val >= 12) return "#6BBF25";
+  if (val >= 90) return "#FFD700";
+  if (val >= 65) return "#E8DEFF";
+  if (val >= 52) return "#BDB5FF";
+  if (val >= 43) return "#5A50C8";
+  if (val >= 35) return "#8B82E8";
+  if (val >= 26) return "#D94C7A";
+  if (val >= 20) return "#E0623C";
+  if (val >= 13) return "#D4891A";
+  if (val >= 9) return "#3E99E8";
+  if (val >= 7) return "#6BBF25";
   return "#9B9A94";
 }
 
@@ -160,13 +166,14 @@ const STATS_META = [
 
 // ── EXP formula (no cap) ──────────────────────────────────────
 function expRequired(level) {
-  return Math.floor(100 * Math.pow(1.22, level - 1));
+  // Formule polynomiale : douce au début, progressive sur le long terme
+  // Calibrée pour Monarque (niv 200) en ~3.5 ans avec streak parfait
+  return Math.floor(40 + 8 * level + 2.5 * Math.pow(level, 1.6));
 }
 
 function getRankForLevel(level) {
   let r = RANKS[0];
   for (let i = RANKS.length - 1; i >= 0; i--) {
-    //parcours en sens inverse
     if (level >= RANKS[i].minLvl) {
       r = RANKS[i];
       break;
@@ -176,20 +183,23 @@ function getRankForLevel(level) {
 }
 function getNextRank(level) {
   for (const r of RANKS) {
-    //parcours dans l'ordre
     if (r.minLvl > level) return r;
   }
-  return null; // après monarque pas de rank
+  return null; // beyond Monarque → no next rank shown
 }
 
 // ── Task scaling ──────────────────────────────────────────────
 function getTaskRequired(task, stats) {
   if (task.type === "check") return 1;
+  // Tâches statiques (urgentes, épreuves) : pas de scaling par stats
+  if (task.static) {
+    return task.type === "timer" ? task.baseMin : task.baseReps;
+  }
   const sv = stats[task.scaleKey] || 5;
   const bonus = Math.max(0, sv - 5);
   if (task.type === "timer")
-    return Math.max(task.baseMin, task.baseMin + Math.floor(bonus * 0.5)); // 2 stats = 1 min
-  return Math.max(task.baseReps, task.baseReps + Math.floor(bonus * 1.0)); // 1 stat pt = 1 rep
+    return Math.max(task.baseMin, task.baseMin + Math.floor(bonus * 0.5));
+  return Math.max(task.baseReps, task.baseReps + Math.floor(bonus * 1.0));
 }
 
 // ── Daily quests ──────────────────────────────────────────────
@@ -459,7 +469,7 @@ const URGENT_POOL = [
     desc: "Le système a détecté une menace. Complétez 100 sauts maintenant.",
     expReward: 80,
     goldReward: 30,
-    timeLimitMin: 30,
+    timeLimitMin: 25,
     color: "#E0623C",
     tasks: [
       {
@@ -467,6 +477,7 @@ const URGENT_POOL = [
         name: "Sauts explosifs",
         type: "reps",
         baseReps: 100,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -479,7 +490,7 @@ const URGENT_POOL = [
     desc: "Tenez la position. Le système vous observe.",
     expReward: 70,
     goldReward: 25,
-    timeLimitMin: 20,
+    timeLimitMin: 25,
     color: "#D4891A",
     tasks: [
       {
@@ -487,6 +498,7 @@ const URGENT_POOL = [
         name: "Planche totale",
         type: "reps",
         baseReps: 120,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -499,7 +511,7 @@ const URGENT_POOL = [
     desc: "Prouvez votre force au système.",
     expReward: 75,
     goldReward: 28,
-    timeLimitMin: 25,
+    timeLimitMin: 20,
     color: "#E0623C",
     tasks: [
       {
@@ -507,6 +519,7 @@ const URGENT_POOL = [
         name: "Pompes",
         type: "reps",
         baseReps: 30,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -515,6 +528,7 @@ const URGENT_POOL = [
         name: "Squats",
         type: "reps",
         baseReps: 30,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -527,7 +541,7 @@ const URGENT_POOL = [
     desc: "Votre esprit est mis à l'épreuve. Concentrez-vous sans interruption.",
     expReward: 65,
     goldReward: 22,
-    timeLimitMin: 15,
+    timeLimitMin: 20,
     color: "#8B82E8",
     tasks: [
       {
@@ -535,6 +549,7 @@ const URGENT_POOL = [
         name: "Concentration absolue",
         type: "timer",
         baseMin: 15,
+        static: true,
         scaleKey: "intelligence",
         desc: "Aucune distraction autorisée",
       },
@@ -547,7 +562,7 @@ const URGENT_POOL = [
     desc: "Le système exige une dépense physique immédiate.",
     expReward: 90,
     goldReward: 35,
-    timeLimitMin: 20,
+    timeLimitMin: 15,
     color: "#D94C7A",
     tasks: [
       {
@@ -555,6 +570,7 @@ const URGENT_POOL = [
         name: "Burpees",
         type: "reps",
         baseReps: 20,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -567,7 +583,7 @@ const URGENT_POOL = [
     desc: "Fermez les yeux. Le système vous attend dans le silence.",
     expReward: 60,
     goldReward: 20,
-    timeLimitMin: 10,
+    timeLimitMin: 15,
     color: "#3E99E8",
     tasks: [
       {
@@ -575,6 +591,7 @@ const URGENT_POOL = [
         name: "Méditation d'urgence",
         type: "timer",
         baseMin: 10,
+        static: true,
         scaleKey: "perception",
         desc: "Pleine conscience totale",
       },
@@ -587,14 +604,15 @@ const URGENT_POOL = [
     desc: "Une fenêtre d'opportunité vient de s'ouvrir. Agissez maintenant.",
     expReward: 70,
     goldReward: 50,
-    timeLimitMin: 30,
+    timeLimitMin: 35,
     color: "#FFD700",
     tasks: [
       {
         id: "t1",
         name: "Sprint business",
         type: "timer",
-        baseMin: 20,
+        baseMin: 25,
+        static: true,
         scaleKey: "richesse",
         desc: "Focus total sur ton projet",
       },
@@ -607,7 +625,7 @@ const URGENT_POOL = [
     desc: "Force et agilité simultanément. Le système n'attend pas.",
     expReward: 100,
     goldReward: 40,
-    timeLimitMin: 35,
+    timeLimitMin: 30,
     color: "#8B82E8",
     tasks: [
       {
@@ -615,6 +633,7 @@ const URGENT_POOL = [
         name: "Tractions",
         type: "reps",
         baseReps: 10,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -623,6 +642,7 @@ const URGENT_POOL = [
         name: "Sprints",
         type: "reps",
         baseReps: 8,
+        static: true,
         scaleKey: "agilite",
         unit: "séries",
       },
@@ -631,6 +651,7 @@ const URGENT_POOL = [
         name: "Dips",
         type: "reps",
         baseReps: 15,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -639,7 +660,7 @@ const URGENT_POOL = [
 ];
 
 function pickRandomUrgentQuest() {
-  return URGENT_POOL[Math.floor(Math.random() * URGENT_POOL.length)]; //random entre 0 et 1 exclu * tableau, arrondi a l'entier inferieur
+  return URGENT_POOL[Math.floor(Math.random() * URGENT_POOL.length)];
 }
 
 // ── Titles (50+) ──────────────────────────────────────────────
@@ -961,7 +982,7 @@ const TITLES = [
     label: "Polyvalent",
     rarity: "epic",
     color: "#A96BE8",
-    condition: { type: "allstats", value: 50 },
+    condition: { type: "allstats", value: 20 },
     desc: "Toutes les stats ≥ 20.",
   },
   {
@@ -1026,7 +1047,7 @@ const TITLES = [
     label: "Transcendant",
     rarity: "legendary",
     color: "#BDB5FF",
-    condition: { type: "allstats", value: 75 },
+    condition: { type: "allstats", value: 50 },
     desc: "Toutes les stats ≥ 50.",
   },
   {
@@ -1123,13 +1144,14 @@ const RANK_TRIALS = [
     icon: "🌿",
     requiredLevel: 5,
     expReward: 60,
-    lore: '"Le Système vous évalue. Seuls les Joueurs qui peuvent maintenir leur corps et leur esprit méritent d\'avancer."',
+    lore: "Le Système vous évalue. Seuls les Joueurs qui peuvent maintenir leur corps et leur esprit méritent d'avancer.",
     tasks: [
       {
         id: "t1",
         name: "Pompes",
         type: "reps",
         baseReps: 20,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1138,6 +1160,7 @@ const RANK_TRIALS = [
         name: "Squats",
         type: "reps",
         baseReps: 20,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1146,6 +1169,7 @@ const RANK_TRIALS = [
         name: "Concentration",
         type: "timer",
         baseMin: 5,
+        static: true,
         scaleKey: "intelligence",
         desc: "5 min de focus total",
       },
@@ -1167,6 +1191,7 @@ const RANK_TRIALS = [
         name: "Pompes",
         type: "reps",
         baseReps: 30,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1174,7 +1199,8 @@ const RANK_TRIALS = [
         id: "t2",
         name: "Tractions",
         type: "reps",
-        baseReps: 10,
+        baseReps: 8,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1183,6 +1209,7 @@ const RANK_TRIALS = [
         name: "Planche",
         type: "reps",
         baseReps: 60,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1191,6 +1218,7 @@ const RANK_TRIALS = [
         name: "Lecture",
         type: "timer",
         baseMin: 10,
+        static: true,
         scaleKey: "intelligence",
         desc: "10 min de lecture sérieuse",
       },
@@ -1205,13 +1233,14 @@ const RANK_TRIALS = [
     icon: "🔥",
     requiredLevel: 20,
     expReward: 180,
-    lore: '"Un chasseur de rang B ne connaît pas l\'excuse. Chaque jour est une bataille contre soi-même."',
+    lore: "Un chasseur de rang B ne connaît pas l'excuse. Chaque jour est une bataille contre soi-même.",
     tasks: [
       {
         id: "t1",
         name: "Pompes",
         type: "reps",
         baseReps: 50,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1220,6 +1249,7 @@ const RANK_TRIALS = [
         name: "Squats",
         type: "reps",
         baseReps: 50,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1228,6 +1258,7 @@ const RANK_TRIALS = [
         name: "Burpees",
         type: "reps",
         baseReps: 15,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1235,7 +1266,8 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Tractions",
         type: "reps",
-        baseReps: 15,
+        baseReps: 12,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1243,7 +1275,8 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Concentration",
         type: "timer",
-        baseMin: 10,
+        baseMin: 15,
+        static: true,
         scaleKey: "intelligence",
         desc: "15 min de focus absolu",
       },
@@ -1252,6 +1285,7 @@ const RANK_TRIALS = [
         name: "Méditation",
         type: "timer",
         baseMin: 10,
+        static: true,
         scaleKey: "perception",
         desc: "Pleine conscience",
       },
@@ -1259,7 +1293,8 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Rituel complet",
         type: "check",
-        desc: "Soin du visage + tenue",
+        static: true,
+        desc: "Douche + soin du visage + tenue",
       },
     ],
   },
@@ -1272,13 +1307,14 @@ const RANK_TRIALS = [
     icon: "⚡",
     requiredLevel: 35,
     expReward: 300,
-    lore: '"Le rang A n\'est pas accordé. Il est arraché au prix de la sueur et de la volonté."',
+    lore: "Le rang A n'est pas accordé. Il est arraché au prix de la sueur et de la volonté.",
     tasks: [
       {
         id: "t1",
         name: "Pompes",
         type: "reps",
         baseReps: 75,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1287,6 +1323,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 20,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1295,6 +1332,7 @@ const RANK_TRIALS = [
         name: "Dips",
         type: "reps",
         baseReps: 30,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1303,6 +1341,7 @@ const RANK_TRIALS = [
         name: "Burpees",
         type: "reps",
         baseReps: 25,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1310,15 +1349,17 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Planche",
         type: "reps",
-        baseReps: 180,
+        baseReps: 120,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
       {
         id: "t6",
-        name: "Sprint",
+        name: "Sprints",
         type: "reps",
         baseReps: 10,
+        static: true,
         scaleKey: "agilite",
         unit: "séries",
       },
@@ -1327,6 +1368,7 @@ const RANK_TRIALS = [
         name: "Apprentissage",
         type: "timer",
         baseMin: 20,
+        static: true,
         scaleKey: "intelligence",
         desc: "Cours / tutoriel intensif",
       },
@@ -1334,7 +1376,8 @@ const RANK_TRIALS = [
         id: "t8",
         name: "Méditation",
         type: "timer",
-        baseMin: 10,
+        baseMin: 15,
+        static: true,
         scaleKey: "perception",
         desc: "Pleine conscience",
       },
@@ -1342,9 +1385,17 @@ const RANK_TRIALS = [
         id: "t9",
         name: "Business",
         type: "timer",
-        baseMin: 20,
+        baseMin: 15,
+        static: true,
         scaleKey: "richesse",
         desc: "Travail sur ton projet",
+      },
+      {
+        id: "t10",
+        name: "Rituel complet",
+        type: "check",
+        static: true,
+        desc: "Douche + rasage + soin + tenue",
       },
     ],
   },
@@ -1357,13 +1408,14 @@ const RANK_TRIALS = [
     icon: "💎",
     requiredLevel: 50,
     expReward: 500,
-    lore: "\"Très peu atteignent ce rang. Ce n'est pas qu'une épreuve physique — c'est une transformation.\"",
+    lore: "Très peu atteignent ce rang. Ce n'est pas qu'une épreuve physique — c'est une transformation.",
     tasks: [
       {
         id: "t1",
         name: "Pompes",
         type: "reps",
         baseReps: 100,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1372,6 +1424,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 30,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1380,6 +1433,7 @@ const RANK_TRIALS = [
         name: "Squats",
         type: "reps",
         baseReps: 100,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1388,6 +1442,7 @@ const RANK_TRIALS = [
         name: "Burpees",
         type: "reps",
         baseReps: 40,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1395,7 +1450,8 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Planche",
         type: "reps",
-        baseReps: 200,
+        baseReps: 180,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1404,6 +1460,7 @@ const RANK_TRIALS = [
         name: "Dips",
         type: "reps",
         baseReps: 50,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1412,6 +1469,7 @@ const RANK_TRIALS = [
         name: "Focus total",
         type: "timer",
         baseMin: 30,
+        static: true,
         scaleKey: "intelligence",
         desc: "Session de travail profond",
       },
@@ -1419,7 +1477,8 @@ const RANK_TRIALS = [
         id: "t8",
         name: "Méditation",
         type: "timer",
-        baseMin: 10,
+        baseMin: 20,
+        static: true,
         scaleKey: "perception",
         desc: "Pleine conscience avancée",
       },
@@ -1428,6 +1487,7 @@ const RANK_TRIALS = [
         name: "Business",
         type: "timer",
         baseMin: 30,
+        static: true,
         scaleKey: "richesse",
         desc: "Sprint de productivité",
       },
@@ -1435,7 +1495,8 @@ const RANK_TRIALS = [
         id: "t10",
         name: "Rituel royal",
         type: "check",
-        desc: "Douche froide + soin",
+        static: true,
+        desc: "Douche froide + rasage + soin + tenue impeccable",
       },
     ],
   },
@@ -1454,7 +1515,8 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 100,
+        baseReps: 150,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1463,6 +1525,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 40,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1470,7 +1533,8 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Burpees",
         type: "reps",
-        baseReps: 40,
+        baseReps: 60,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1479,6 +1543,7 @@ const RANK_TRIALS = [
         name: "Planche",
         type: "reps",
         baseReps: 240,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1486,15 +1551,17 @@ const RANK_TRIALS = [
         id: "t5",
         name: "Focus total",
         type: "timer",
-        baseMin: 20,
+        baseMin: 45,
+        static: true,
         scaleKey: "intelligence",
         desc: "Concentration absolue",
       },
       {
         id: "t6",
-        name: "Méditation profonde",
+        name: "Méditation",
         type: "timer",
-        baseMin: 15,
+        baseMin: 30,
+        static: true,
         scaleKey: "perception",
         desc: "Conscience totale",
       },
@@ -1502,7 +1569,8 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Sprint business",
         type: "timer",
-        baseMin: 30,
+        baseMin: 45,
+        static: true,
         scaleKey: "richesse",
         desc: "Deep work session",
       },
@@ -1510,6 +1578,7 @@ const RANK_TRIALS = [
         id: "t8",
         name: "Rituel du chasseur",
         type: "check",
+        static: true,
         desc: "Protocole complet de soin",
       },
     ],
@@ -1523,13 +1592,14 @@ const RANK_TRIALS = [
     icon: "👁️",
     requiredLevel: 90,
     expReward: 1200,
-    lore: '"Vous n\'êtes plus un simple joueur. Vous êtes une force de la nature."',
+    lore: "Vous n'êtes plus un simple joueur. Vous êtes une force de la nature.",
     tasks: [
       {
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 150,
+        baseReps: 200,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1538,6 +1608,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 50,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1545,7 +1616,8 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Dips",
         type: "reps",
-        baseReps: 60,
+        baseReps: 80,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1554,6 +1626,7 @@ const RANK_TRIALS = [
         name: "Burpees",
         type: "reps",
         baseReps: 80,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1562,6 +1635,7 @@ const RANK_TRIALS = [
         name: "Planche",
         type: "reps",
         baseReps: 300,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1570,6 +1644,7 @@ const RANK_TRIALS = [
         name: "Focus total",
         type: "timer",
         baseMin: 60,
+        static: true,
         scaleKey: "intelligence",
         desc: "Une heure de concentration pure",
       },
@@ -1577,7 +1652,8 @@ const RANK_TRIALS = [
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 30,
+        baseMin: 45,
+        static: true,
         scaleKey: "perception",
         desc: "Éveil profond",
       },
@@ -1586,6 +1662,7 @@ const RANK_TRIALS = [
         name: "Business intensif",
         type: "timer",
         baseMin: 60,
+        static: true,
         scaleKey: "richesse",
         desc: "Session de création de valeur",
       },
@@ -1593,6 +1670,7 @@ const RANK_TRIALS = [
         id: "t9",
         name: "Rituel du seigneur",
         type: "check",
+        static: true,
         desc: "Protocole complet impeccable",
       },
     ],
@@ -1612,7 +1690,8 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 200,
+        baseReps: 250,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1621,6 +1700,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 60,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1628,7 +1708,8 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Squats",
         type: "reps",
-        baseReps: 150,
+        baseReps: 200,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1636,7 +1717,8 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Burpees",
         type: "reps",
-        baseReps: 60,
+        baseReps: 100,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1645,6 +1727,7 @@ const RANK_TRIALS = [
         name: "Planche",
         type: "reps",
         baseReps: 360,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1653,14 +1736,16 @@ const RANK_TRIALS = [
         name: "Focus absolu",
         type: "timer",
         baseMin: 90,
+        static: true,
         scaleKey: "intelligence",
-        desc: "Une heure et demie de deep work",
+        desc: "1h30 de deep work",
       },
       {
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 20,
+        baseMin: 60,
+        static: true,
         scaleKey: "perception",
         desc: "Conscience totale",
       },
@@ -1669,6 +1754,7 @@ const RANK_TRIALS = [
         name: "Business",
         type: "timer",
         baseMin: 90,
+        static: true,
         scaleKey: "richesse",
         desc: "Création de valeur intensive",
       },
@@ -1676,6 +1762,7 @@ const RANK_TRIALS = [
         id: "t9",
         name: "Rituel",
         type: "check",
+        static: true,
         desc: "Protocole de soin complet",
       },
     ],
@@ -1695,7 +1782,8 @@ const RANK_TRIALS = [
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 220,
+        baseReps: 300,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1704,6 +1792,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 80,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1712,6 +1801,7 @@ const RANK_TRIALS = [
         name: "Dips",
         type: "reps",
         baseReps: 100,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1719,7 +1809,8 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Burpees",
         type: "reps",
-        baseReps: 50,
+        baseReps: 120,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1728,6 +1819,7 @@ const RANK_TRIALS = [
         name: "Planche",
         type: "reps",
         baseReps: 480,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1735,15 +1827,17 @@ const RANK_TRIALS = [
         id: "t6",
         name: "Deep work",
         type: "timer",
-        baseMin: 30,
+        baseMin: 120,
+        static: true,
         scaleKey: "intelligence",
-        desc: "30 minutes de concentration",
+        desc: "2 heures de concentration",
       },
       {
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 20,
+        baseMin: 60,
+        static: true,
         scaleKey: "perception",
         desc: "Maîtrise intérieure",
       },
@@ -1752,6 +1846,7 @@ const RANK_TRIALS = [
         name: "Business",
         type: "timer",
         baseMin: 120,
+        static: true,
         scaleKey: "richesse",
         desc: "Travail de maître",
       },
@@ -1759,6 +1854,7 @@ const RANK_TRIALS = [
         id: "t9",
         name: "Rituel national",
         type: "check",
+        static: true,
         desc: "Protocole de soin complet parfait",
       },
     ],
@@ -1772,13 +1868,14 @@ const RANK_TRIALS = [
     icon: "👑",
     requiredLevel: 200,
     expReward: 5000,
-    lore: "\"Vous regardez en arrière et vous voyez un chemin que personne d'autre n'aurait pu parcourir. Vous êtes le Monarque.\"",
+    lore: "Vous regardez en arrière et vous voyez un chemin que personne d'autre n'aurait pu parcourir. Vous êtes le Monarque.",
     tasks: [
       {
         id: "t1",
         name: "Pompes",
         type: "reps",
-        baseReps: 250,
+        baseReps: 500,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1787,6 +1884,7 @@ const RANK_TRIALS = [
         name: "Tractions",
         type: "reps",
         baseReps: 100,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1794,7 +1892,8 @@ const RANK_TRIALS = [
         id: "t3",
         name: "Squats",
         type: "reps",
-        baseReps: 200,
+        baseReps: 300,
+        static: true,
         scaleKey: "force",
         unit: "rép.",
       },
@@ -1802,7 +1901,8 @@ const RANK_TRIALS = [
         id: "t4",
         name: "Burpees",
         type: "reps",
-        baseReps: 100,
+        baseReps: 150,
+        static: true,
         scaleKey: "endurance",
         unit: "rép.",
       },
@@ -1811,6 +1911,7 @@ const RANK_TRIALS = [
         name: "Planche",
         type: "reps",
         baseReps: 600,
+        static: true,
         scaleKey: "endurance",
         unit: "sec",
       },
@@ -1818,15 +1919,17 @@ const RANK_TRIALS = [
         id: "t6",
         name: "Deep work",
         type: "timer",
-        baseMin: 30,
+        baseMin: 180,
+        static: true,
         scaleKey: "intelligence",
-        desc: "30 minutes de travail profond",
+        desc: "3 heures de travail profond",
       },
       {
         id: "t7",
         name: "Méditation",
         type: "timer",
-        baseMin: 20,
+        baseMin: 90,
+        static: true,
         scaleKey: "perception",
         desc: "Éveil total",
       },
@@ -1835,6 +1938,7 @@ const RANK_TRIALS = [
         name: "Business",
         type: "timer",
         baseMin: 180,
+        static: true,
         scaleKey: "richesse",
         desc: "Création de valeur maximale",
       },
@@ -1842,6 +1946,7 @@ const RANK_TRIALS = [
         id: "t9",
         name: "Rituel du Monarque",
         type: "check",
+        static: true,
         desc: "Cérémonie de préparation complète",
       },
     ],
@@ -1849,14 +1954,26 @@ const RANK_TRIALS = [
 ];
 
 // Get the trial the player needs to unlock their next rank
+// ── Streak multiplier ─────────────────────────────────────────
+function getStreakMultiplier(streak) {
+  const s = streak || 0;
+  if (s >= 365) return 3.5;
+  if (s >= 225) return 3.0;
+  if (s >= 150) return 2.75;
+  if (s >= 100) return 2.5;
+  if (s >= 60) return 2.0;
+  if (s >= 30) return 1.75;
+  if (s >= 14) return 1.5;
+  if (s >= 7) return 1.25;
+  if (s >= 3) return 1.1;
+  return 1.0;
+}
+
 function getAvailableTrial(player) {
   const currentRank = getRankForLevel(player.level);
-  // Cherche le trial correspondant au rang actuel du joueur
   const trial = RANK_TRIALS.find((t) => t.forRank === currentRank.name);
   if (!trial) return null;
-  // Seulement si le joueur a atteint le niveau requis
   if (player.level < trial.requiredLevel) return null;
-  // Déjà passé ?
   if ((player.completed_trials || []).includes(trial.id)) return null;
   return trial;
 }
